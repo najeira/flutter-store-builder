@@ -126,6 +126,10 @@ class Channel<V> {
     store._set(name, value, error);
   }
   
+  void error(Object error) {
+    store._set(name, null, error);
+  }
+  
   void addListener<V>(ValueCallback<V> callback) {
     store._addListener(name, callback);
   }
