@@ -1,24 +1,27 @@
+import 'dart:async';
+
 import 'store.dart';
 
 /// Defines an action handler to produce new state.
-typedef void Producer<S extends StoreBase>(S store, dynamic action);
+typedef Future<void> Producer<S extends StoreBase>(S store, dynamic action);
 
 /// Defines a [Producer] using a class interface.
 abstract class ProducerClass<S extends StoreBase> {
-  void call(S store, dynamic action);
+  Future<void> call(S store, dynamic action);
 }
 
 /// A convenience class for binding [Producer]s to Actions of a given Type.
 class TypedProducer<S extends StoreBase, Action> implements ProducerClass<S> {
   const TypedProducer(this.producer);
   
-  final void Function(S store, Action action) producer;
+  final Future<void> Function(S store, Action action) producer;
 
   @override
-  void call(S store, dynamic action) {
+  Future<void> call(S store, dynamic action) {
     if (action is Action) {
-      producer(store, action);
+      return producer(store, action);
     }
+    return null;
   }
 }
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import 'producer.dart';
@@ -24,8 +26,8 @@ class StoreBase {
   }
   
   /// Disptaches a [action].
-  void dispatch(dynamic action) {
-    _producer(this, action);
+  Future<void> dispatch(dynamic action) {
+    return _producer(this, action);
   }
   
   /// Returns the value for the given [name] or null if [name] is not in the [Store].
