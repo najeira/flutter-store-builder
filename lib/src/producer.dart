@@ -1,11 +1,14 @@
 import 'store.dart';
 
+/// Defines an action handler to produce new state.
 typedef void Producer<S extends StoreBase>(S store, dynamic action);
 
+/// Defines a [Producer] using a class interface.
 abstract class ProducerClass<S extends StoreBase> {
   void call(S store, dynamic action);
 }
 
+/// A convenience class for binding [Producer]s to Actions of a given Type.
 class TypedProducer<S extends StoreBase, Action> implements ProducerClass<S> {
   const TypedProducer(this.producer);
   

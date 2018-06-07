@@ -4,7 +4,10 @@ import 'producer.dart';
 
 typedef ValueCallback<V>(Value<V> value);
 
-/// 
+/// A Flux store that holds the app status.
+///
+/// The only way to change the state tree in the store is to [dispatch] an
+/// action. The action will be sent to the given [Producer] to haneld.
 class StoreBase {
   StoreBase(Producer producer)
     :
@@ -15,6 +18,7 @@ class StoreBase {
   
   final Map<String, _Holder> _holders;
   
+  /// Creates a [Channel] for the given [name].
   Channel<V> chan<V>(String name) {
     return new Channel(this, name);
   }
@@ -66,6 +70,11 @@ class StoreBase {
         this._holders.remove(name);
       }
     }
+  }
+  
+  bool _hasListeners(String name) {
+    final holder = this._holders[name];
+    return holder?.hasListeners ?? false;
   }
 }
 
@@ -136,6 +145,10 @@ class Channel<V> {
   
   void removeListener(ValueCallback<V> callback) {
     store._removeListener(name, callback);
+  }
+  
+  bool get hasListeners {
+    return store._hasListeners(name);
   }
   
   ValueCallback<V> createValueCallback(VoidCallback callback) {

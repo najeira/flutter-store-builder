@@ -5,19 +5,18 @@ import 'provider.dart';
 
 /// Build a Widget using the [BuildContext] and [Value].
 typedef ValueWidgetBuilder<V> = Widget Function(
-  BuildContext context, V value, Object error);
+  BuildContext context, Value<V> value);
 
-/// A function that will be run when the [ChannelBuilder] is initialized.
+/// Called when the [ChannelBuilder] is inserted into the Widget tree.
 ///
 /// It is run in the [State.initState] method.
 /// 
 /// This can be useful for dispatching actions that fetch data for your
 /// Widget when it is first displayed.
 typedef InitWithValueCallback<S extends StoreBase, V> = void Function(
-  S store, V value, Object error);
+  S store, Value<V> value);
 
-/// A function that will be run when the [ChannelBuilder] is removed from the
-/// Widget Tree.
+/// Called when the [ChannelBuilder] is removed from the Widget tree.
 ///
 /// It is run in the [State.dispose] method.
 ///
@@ -25,6 +24,15 @@ typedef InitWithValueCallback<S extends StoreBase, V> = void Function(
 /// your State tree.
 typedef DisposeCallback<S extends StoreBase> = void Function(
   S store);
+
+/// Called when the [Value] is updated.
+/// 
+/// It will be called before calling the builder.
+/// 
+/// This can be useful for imperative calls to things like Navigator,
+/// TabController, etc.
+typedef OnUpdatedCallback<S extends StoreBase, V> = void Function(
+  S store, Value<V> value);
 
 /// Build a widget based on the state of the [Store].
 /// 
@@ -36,6 +44,7 @@ class ChannelBuilder<S extends StoreBase, V> extends StatelessWidget {
     @required this.builder,
     this.onInit,
     this.onDispose,
+    this.onUpdated,
   })
     : assert(channel != null),
       assert(builder != null),
@@ -53,6 +62,9 @@ class ChannelBuilder<S extends StoreBase, V> extends StatelessWidget {
   /// 
   final DisposeCallback<S> onDispose;
   
+  /// 
+  final OnUpdatedCallback<S, V> onUpdated;
+  
   @override
   Widget build(BuildContext context) {
     final S store = StoreProvider.of<S>(context);
@@ -62,6 +74,7 @@ class ChannelBuilder<S extends StoreBase, V> extends StatelessWidget {
       builder: builder,
       onInit: onInit,
       onDispose: onDispose,
+      onUpdated: onUpdated,
     );
   }
 }
@@ -74,6 +87,7 @@ class _ChannelBuilder<S extends StoreBase, V> extends StatefulWidget {
     @required this.builder,
     this.onInit,
     this.onDispose,
+    this.onUpdated,
   })
     : assert(store != null),
       assert(channel != null),
@@ -85,6 +99,7 @@ class _ChannelBuilder<S extends StoreBase, V> extends StatefulWidget {
   final ValueWidgetBuilder<V> builder;
   final InitWithValueCallback<S, V> onInit;
   final DisposeCallback<S> onDispose;
+  final OnUpdatedCallback<S, V> onUpdated;
   
   @override
   State<StatefulWidget> createState() {
@@ -99,7 +114,7 @@ class _ChannelBuilderState<S extends StoreBase, V> extends State<_ChannelBuilder
     widget.channel.addListener(_onValueUpdated);
     if (widget.onInit != null) {
       final Value<V> value = widget.channel.get();
-      widget.onInit(widget.store, value?.value, value?.error);
+      widget.onInit(widget.store, value);
     }
   }
   
@@ -124,10 +139,13 @@ class _ChannelBuilderState<S extends StoreBase, V> extends State<_ChannelBuilder
   @override
   Widget build(BuildContext context) {
     final Value<V> value = widget.channel.get();
-    return widget.builder(context, value?.value, value?.error);
+    return widget.builder(context, value);
   }
   
   void _onValueUpdated(Value<V> value) {
+    if (widget.onUpdated != null) {
+      widget.onUpdated(widget.store, value);
+    }
     setState(() {});
   }
 }
