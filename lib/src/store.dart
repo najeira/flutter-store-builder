@@ -100,7 +100,6 @@ class _Holder<V> {
   void setValue(V value, Object error) {
     final bool changed = (value != _value.value || error != _value.error);
     _value = new Value(value, error);
-    
     _listeners.forEach((ValueCallback<V> listener, bool distinct) {
       if (changed || !distinct) {
         listener(_value);
@@ -114,7 +113,6 @@ class _Holder<V> {
   
   void addListener(ValueCallback<V> listener, {bool distinct = false}) {
     assert(listener != null);
-    //_listeners.add(listener);
     _listeners[listener] = distinct;
   }
   

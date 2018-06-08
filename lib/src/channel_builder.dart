@@ -45,7 +45,7 @@ class ChannelBuilder<S extends StoreBase, V> extends StatelessWidget {
     this.onInit,
     this.onDispose,
     this.onUpdated,
-    this.distinct,
+    this.distinct = false,
   })
     : assert(channel != null),
       assert(builder != null),
@@ -84,6 +84,7 @@ class ChannelBuilder<S extends StoreBase, V> extends StatelessWidget {
       onInit: onInit,
       onDispose: onDispose,
       onUpdated: onUpdated,
+      distinct: distinct,
     );
   }
 }
@@ -97,6 +98,7 @@ class _ChannelBuilder<S extends StoreBase, V> extends StatefulWidget {
     this.onInit,
     this.onDispose,
     this.onUpdated,
+    this.distinct,
   })
     : assert(store != null),
       assert(channel != null),
@@ -109,6 +111,7 @@ class _ChannelBuilder<S extends StoreBase, V> extends StatefulWidget {
   final InitWithValueCallback<S, V> onInit;
   final DisposeCallback<S> onDispose;
   final OnUpdatedCallback<S, V> onUpdated;
+  final bool distinct;
   
   @override
   State<StatefulWidget> createState() {
@@ -120,7 +123,7 @@ class _ChannelBuilderState<S extends StoreBase, V> extends State<_ChannelBuilder
   @override
   void initState() {
     super.initState();
-    widget.channel.addListener(_onValueUpdated);
+    widget.channel.addListener(_onValueUpdated, distinct: widget.distinct);
     if (widget.onInit != null) {
       final Value<V> value = widget.channel.get();
       widget.onInit(widget.store, value);
@@ -132,7 +135,7 @@ class _ChannelBuilderState<S extends StoreBase, V> extends State<_ChannelBuilder
     super.didUpdateWidget(oldWidget);
     if (oldWidget.channel != widget.channel) {
       oldWidget.channel.removeListener(_onValueUpdated);
-      widget.channel.addListener(_onValueUpdated);
+      widget.channel.addListener(_onValueUpdated, distinct: widget.distinct);
     }
   }
   
