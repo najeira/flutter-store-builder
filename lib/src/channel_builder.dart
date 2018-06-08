@@ -45,6 +45,7 @@ class ChannelBuilder<S extends StoreBase, V> extends StatelessWidget {
     this.onInit,
     this.onDispose,
     this.onUpdated,
+    this.distinct,
   })
     : assert(channel != null),
       assert(builder != null),
@@ -64,6 +65,14 @@ class ChannelBuilder<S extends StoreBase, V> extends StatelessWidget {
   
   /// 
   final OnUpdatedCallback<S, V> onUpdated;
+  
+  /// As a performance optimization, 
+  /// the Widget can be rebuilt only when the [V] changes. 
+  /// 
+  /// In order for this to work correctly, you must implement [==] and
+  /// [hashCode] for the [V], and set the [distinct] to true when creating
+  /// your [ChannelBuilder].
+  final bool distinct;
   
   @override
   Widget build(BuildContext context) {

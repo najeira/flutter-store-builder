@@ -53,13 +53,13 @@ class StoreBase {
   // 指定したkeyが更新された場合に通知を受け取るcallbackを登録する
   // 通常、この関数はState.initStateから呼び出される
   // subscribeした場合は、State.disposeでunsubscribeする
-  void _addListener<V>(String name, ValueCallback<V> callback) {
+  void _addListener<V>(String name, ValueCallback<V> callback, {bool distinct = false}) {
     _Holder<V> holder = this._holders[name];
     if (holder == null) {
       holder = new _Holder<V>();
       this._holders[name] = holder;
     }
-    holder.addListener(callback);
+    holder.addListener(callback, distinct: distinct);
   }
   
   // 指定したkeyに登録したcallbackを解除する
@@ -93,27 +93,29 @@ class Value<V> {
 }
 
 class _Holder<V> {
-  final List<ValueCallback<V>> _listeners = <ValueCallback<V>>[];
+  final Map<ValueCallback<V>, bool> _listeners = <ValueCallback<V>, bool>{};
   
   Value<V> _value;
   
   void setValue(V value, Object error) {
-    if (value == _value.value && error == _value.error) {
-      return;
-    }
+    final bool changed = (value != _value.value || error != _value.error);
     _value = new Value(value, error);
-    for (var listener in _listeners) {
-      listener(_value);
-    }
+    
+    _listeners.forEach((ValueCallback<V> listener, bool distinct) {
+      if (changed || !distinct) {
+        listener(_value);
+      }
+    });
   }
   
   bool get hasListeners {
     return _listeners.length > 0;
   }
   
-  void addListener(ValueCallback<V> listener) {
+  void addListener(ValueCallback<V> listener, {bool distinct = false}) {
     assert(listener != null);
-    _listeners.add(listener);
+    //_listeners.add(listener);
+    _listeners[listener] = distinct;
   }
   
   void removeListener(ValueCallback<V> listener) {
@@ -141,12 +143,17 @@ class Channel<V> {
     store._set(name, null, error);
   }
   
-  void addListener<V>(ValueCallback<V> callback) {
-    store._addListener(name, callback);
+  void addListener(ValueCallback<V> callback, {bool distinct = false}) {
+    store._addListener(name, callback, distinct: distinct);
   }
   
   void removeListener(ValueCallback<V> callback) {
     store._removeListener(name, callback);
+  }
+  
+  Subscription<V> listen(ValueCallback<V> callback) {
+    addListener(callback);
+    return new Subscription._(this, callback);
   }
   
   bool get hasListeners {
