@@ -149,11 +149,6 @@ class Channel<V> {
     store._removeListener(name, callback);
   }
   
-  Subscription<V> listen(ValueCallback<V> callback) {
-    addListener(callback);
-    return new Subscription._(this, callback);
-  }
-  
   bool get hasListeners {
     return store._hasListeners(name);
   }
@@ -162,5 +157,20 @@ class Channel<V> {
     return (Value<V> value) {
       callback();
     };
+  }
+  
+  @override
+  int get hashCode {
+    return identityHashCode(store) ^ identityHashCode(name);
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is Channel 
+      && other.store == store 
+      && other.name == name;
   }
 }
