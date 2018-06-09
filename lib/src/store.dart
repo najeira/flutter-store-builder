@@ -6,10 +6,12 @@ import 'producer.dart';
 
 typedef ValueCallback<V>(Value<V> value);
 
-/// A Flux store that holds the app status.
+/// A Flux store that holds the app state.
 ///
-/// The only way to change the state tree in the store is to [dispatch] an
-/// action. The action will be sent to the given [Producer] to haneld.
+/// The only way to change the state in the store is to [dispatch] an action.
+/// The action will be sent to the given [Producer] to handle it.
+/// 
+/// Extends [StoreBase] to provide app's Store.
 class StoreBase {
   StoreBase(Producer producer)
     :
