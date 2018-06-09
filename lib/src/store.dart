@@ -87,6 +87,8 @@ class StoreBase {
 class Value<V> {
   const Value(this.value, this.error);
   
+  const Value.empty() : this(null, null);
+  
   /// 
   final V value;
   
