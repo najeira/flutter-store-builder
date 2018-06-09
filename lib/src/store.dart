@@ -38,7 +38,7 @@ class StoreBase {
     if (holder != null && holder._value != null) {
       return holder._value as Value<V>;
     }
-    return null;
+    return const Value<V>.empty();
   }
   
   /// Stores the [value] for the given [name] to [Store].
