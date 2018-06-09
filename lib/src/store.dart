@@ -42,23 +42,29 @@ class StoreBase {
   }
   
   /// Stores the [value] for the given [name] to [Store].
-  void _set<V>(String name, V value, [Object error]) {
-    final holder = this._holders[name];
-    if (holder != null) {
-      // 値を必要とするStoreBuilderから関連するActionが発行され
-      // その結果として値が得られputされる
-      // よってholderがいる場合だけ値を保持する
-      holder.setValue(value, error);
+  void _set<V>(String name, {
+    V value,
+    Object error,
+    bool volatile = true,
+  }) {
+    var holder = this._holders[name];
+    if (holder == null && !volatile) {
+      holder = new _Holder<V>(volatile);
+      this._holders[name] = holder;
     }
+    holder?.setValue(value, error);
   }
   
   // 指定したkeyが更新された場合に通知を受け取るcallbackを登録する
   // 通常、この関数はState.initStateから呼び出される
   // subscribeした場合は、State.disposeでunsubscribeする
-  void _addListener<V>(String name, ValueCallback<V> callback, {bool distinct = false}) {
+  void _addListener<V>(String name, ValueCallback<V> callback, {
+    bool distinct = false,
+    bool volatile = true,
+  }) {
     _Holder<V> holder = this._holders[name];
     if (holder == null) {
-      holder = new _Holder<V>();
+      holder = new _Holder<V>(volatile);
       this._holders[name] = holder;
     }
     holder.addListener(callback, distinct: distinct);
@@ -70,15 +76,10 @@ class StoreBase {
     final holder = this._holders[name];
     if (holder != null) {
       holder.removeListener(callback);
-      if (!(holder.hasListeners)) {
+      if (holder.disposable) {
         this._holders.remove(name);
       }
     }
-  }
-  
-  bool _hasListeners(String name) {
-    final holder = this._holders[name];
-    return holder?.hasListeners ?? false;
   }
 }
 
@@ -105,6 +106,10 @@ class Value<V> {
 }
 
 class _Holder<V> {
+  _Holder(this.volatile);
+  
+  final bool volatile;
+  
   final Map<ValueCallback<V>, bool> _listeners = <ValueCallback<V>, bool>{};
   
   Value<V> _value;
@@ -119,8 +124,8 @@ class _Holder<V> {
     });
   }
   
-  bool get hasListeners {
-    return _listeners.length > 0;
+  bool get disposable {
+    return volatile && _listeners.length <= 0;
   }
   
   void addListener(ValueCallback<V> listener, {bool distinct = false}) {
@@ -135,54 +140,46 @@ class _Holder<V> {
 }
 
 class Channel<V> {
-  Channel(this.store, this.name);
+  const Channel(this.store, this.name, {this.volatile = true});
   
   final StoreBase store;
   
   final String name;
+  
+  final bool volatile;
   
   Value<V> get() {
     return store._get<V>(name);
   }
   
   void set(V value, [Object error]) {
-    store._set(name, value, error);
+    store._set(name, value: value, error: error, volatile: volatile);
   }
   
   void error(Object error) {
-    store._set(name, null, error);
+    store._set(name, value: null, error: error, volatile: volatile);
   }
   
   void addListener(ValueCallback<V> callback, {bool distinct = false}) {
-    store._addListener(name, callback, distinct: distinct);
+    store._addListener(name, callback, distinct: distinct, volatile: volatile);
   }
   
   void removeListener(ValueCallback<V> callback) {
     store._removeListener(name, callback);
   }
   
-  bool get hasListeners {
-    return store._hasListeners(name);
-  }
-  
-  ValueCallback<V> createValueCallback(VoidCallback callback) {
-    return (Value<V> value) {
-      callback();
-    };
-  }
-  
   @override
   int get hashCode {
     return identityHashCode(store) ^ identityHashCode(name);
   }
-
+  
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other)) {
       return true;
     }
-    return other is Channel 
-      && other.store == store 
+    return other is Channel
+      && other.store == store
       && other.name == name;
   }
 }
