@@ -94,6 +94,14 @@ class Value<V> {
   
   /// 
   final Object error;
+  
+  bool get isEmpty {
+    return value == null && error == null;
+  }
+  
+  bool get isNotEmpty {
+    return !isEmpty;
+  }
 }
 
 class _Holder<V> {
