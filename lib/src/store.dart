@@ -23,8 +23,8 @@ class StoreBase {
   final Map<String, _Holder> _holders;
   
   /// Creates a [Channel] for the given [name].
-  Channel<V> chan<V>(String name) {
-    return new Channel(this, name);
+  Channel<V> chan<V>(String name, {bool volatile = true}) {
+    return new Channel(this, name, volatile: volatile);
   }
   
   /// Disptaches a [action].
