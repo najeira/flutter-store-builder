@@ -141,10 +141,10 @@ class _ChannelBuilderState<S extends StoreBase, V> extends State<_ChannelBuilder
   
   @override
   void dispose() {
+    widget.channel.removeListener(_onValueUpdated);
     if (widget.onDispose != null) {
       widget.onDispose(widget.store);
     }
-    widget.channel.removeListener(_onValueUpdated);
     super.dispose();
   }
   
