@@ -40,7 +40,8 @@ Producer<S> combineProducer<S extends StoreBase>(Map<Type, ProducerClass<S>> pro
   return (S store, dynamic action) {
     final producer = producers[action.runtimeType];
     if (producer != null) {
-      producer.call(store, action);
+      return producer.call(store, action);
     }
+    return null;
   };
 }
