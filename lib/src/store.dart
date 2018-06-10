@@ -13,7 +13,7 @@ typedef ValueCallback<V>(Value<V> value);
 /// 
 /// Extends [StoreBase] to provide app's Store.
 class StoreBase {
-  StoreBase(Producer producer)
+  StoreBase(dynamic producer)
     :
       _producer = producer,
       _holders = <String, _Holder>{};
