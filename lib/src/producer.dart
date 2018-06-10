@@ -49,7 +49,7 @@ class TypedProducer<S extends StoreBase, Action> implements ProducerClass<S> {
 //  };
 //}
 class CombineProducer<S extends StoreBase> implements Producer {
-  CombineProducer(this.producers);
+  const CombineProducer(this.producers);
   
   final Map<Type, ProducerClass<S>> producers;
   
