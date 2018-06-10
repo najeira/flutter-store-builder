@@ -18,7 +18,7 @@ class StoreBase {
       _producer = producer,
       _holders = <String, _Holder>{};
   
-  final Producer _producer;
+  final dynamic _producer;
   
   final Map<String, _Holder> _holders;
   
