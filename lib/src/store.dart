@@ -115,7 +115,7 @@ class _Holder<V> {
   Value<V> _value;
   
   void setValue(V value, Object error) {
-    final bool changed = (value != _value.value || error != _value.error);
+    final bool changed = (value != _value?.value || error != _value?.error);
     _value = new Value(value, error);
     _listeners.forEach((ValueCallback<V> listener, bool distinct) {
       if (changed || !distinct) {
