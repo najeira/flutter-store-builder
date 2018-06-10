@@ -13,12 +13,12 @@ typedef ValueCallback<V>(Value<V> value);
 /// 
 /// Extends [StoreBase] to provide app's Store.
 class StoreBase {
-  StoreBase(dynamic producer)
+  StoreBase(Producer producer)
     :
       _producer = producer,
       _holders = <String, _Holder>{};
   
-  final dynamic _producer;
+  final Producer _producer;
   
   final Map<String, _Holder> _holders;
   
@@ -29,7 +29,7 @@ class StoreBase {
   
   /// Disptaches a [action].
   Future<void> dispatch(dynamic action) {
-    return _producer(this, action);
+    return _producer.call(this, action);
   }
   
   /// Returns the value for the given [name] or null if [name] is not in the [Store].
@@ -38,7 +38,7 @@ class StoreBase {
     if (holder != null && holder._value != null) {
       return holder._value as Value<V>;
     }
-    return const Value<V>.empty();
+    return new Value<V>.empty();
   }
   
   /// Stores the [value] for the given [name] to [Store].
@@ -86,9 +86,9 @@ class StoreBase {
 /// 
 @immutable
 class Value<V> {
-  const Value(this.value, this.error);
+  Value(this.value, this.error);
   
-  const Value.empty() : this(null, null);
+  Value.empty() : this(null, null);
   
   /// 
   final V value;
