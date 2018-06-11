@@ -1,35 +1,36 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
-import 'producer.dart';
-
-typedef ValueCallback<V>(Value<V> value);
+import 'provider.dart';
+import 'channel_builder.dart';
 
 /// A Flux store that holds the app state.
 ///
 /// The only way to change the state in the store is to [dispatch] an action.
 /// The action will be sent to the given [Producer] to handle it.
 /// 
-/// Extends [StoreBase] to provide app's Store.
-class StoreBase {
-  StoreBase(Producer producer)
+/// Extends [Store] to provide app's Store.
+class Store {
+  Store()
     :
-      _producer = producer,
       _holders = <String, _Holder>{};
-  
-  final Producer _producer;
   
   final Map<String, _Holder> _holders;
   
-  /// Creates a [Channel] for the given [name].
-  Channel<V> chan<V>(String name, {bool volatile = true}) {
-    return new Channel(this, name, volatile: volatile);
+  static Store of(BuildContext context) {
+    return StoreProvider.of(context);
   }
   
-  /// Disptaches a [action].
-  Future<void> dispatch(dynamic action) {
-    return _producer.call(this, action);
+  /// Runs a [action].
+  Future<void> action(Action action) {
+    return action.run(this);
+  }
+  
+  /// Creates a [Channel] for the given [name].
+  Channel<V> channel<V>(String name, {bool volatile = true}) {
+    return new Channel<V>(this, name, volatile: volatile);
   }
   
   /// Returns the value for the given [name] or null if [name] is not in the [Store].
@@ -83,11 +84,17 @@ class StoreBase {
   }
 }
 
+abstract class Action {
+  Future<void> run(Store store);
+}
+
 /// 
 @immutable
 class Value<V> {
+  /// 
   Value(this.value, this.error);
   
+  /// 
   Value.empty() : this(null, null);
   
   /// 
@@ -96,10 +103,12 @@ class Value<V> {
   /// 
   final Object error;
   
+  /// 
   bool get isEmpty {
     return value == null && error == null;
   }
   
+  /// 
   bool get isNotEmpty {
     return !isEmpty;
   }
@@ -139,10 +148,16 @@ class _Holder<V> {
   }
 }
 
+/// Example:
+///     class Channels {
+///       static Channel<String> myName(Store store) {
+///         return store.channel("my-name", volatile: false);
+///       }
+///     }
 class Channel<V> {
   const Channel(this.store, this.name, {this.volatile = true});
   
-  final StoreBase store;
+  final Store store;
   
   final String name;
   

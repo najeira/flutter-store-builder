@@ -3,6 +3,8 @@ import 'package:flutter/widgets.dart';
 import 'store.dart';
 import 'provider.dart';
 
+typedef ValueCallback<V>(Value<V> value);
+
 /// Build a Widget using the [BuildContext] and [Value].
 typedef ValueWidgetBuilder<V> = Widget Function(
   BuildContext context, Value<V> value);
@@ -13,8 +15,8 @@ typedef ValueWidgetBuilder<V> = Widget Function(
 /// 
 /// This can be useful for dispatching actions that fetch data for your
 /// Widget when it is first displayed.
-typedef InitWithValueCallback<S extends StoreBase, V> = void Function(
-  S store, Value<V> value);
+typedef InitWithValueCallback<V> = void Function(
+  Store store, Value<V> value);
 
 /// Called when the [ChannelBuilder] is removed from the Widget tree.
 ///
@@ -22,8 +24,8 @@ typedef InitWithValueCallback<S extends StoreBase, V> = void Function(
 ///
 /// This can be useful for dispatching actions that remove stale data from
 /// your State tree.
-typedef DisposeCallback<S extends StoreBase> = void Function(
-  S store);
+typedef DisposeCallback = void Function(
+  Store store);
 
 /// Called when the [Value] is updated.
 /// 
@@ -31,13 +33,13 @@ typedef DisposeCallback<S extends StoreBase> = void Function(
 /// 
 /// This can be useful for imperative calls to things like Navigator,
 /// TabController, etc.
-typedef OnUpdatedCallback<S extends StoreBase, V> = void Function(
-  S store, Value<V> value);
+typedef OnUpdatedCallback<V> = void Function(
+  Store store, Value<V> value);
 
 /// Build a widget based on the state of the [Store].
 /// 
 /// Every time the value of [channel] changes, the Widget will be rebuilt.
-class ChannelBuilder<S extends StoreBase, V> extends StatelessWidget {
+class ChannelBuilder<V> extends StatelessWidget {
   ChannelBuilder({
     Key key,
     @required this.channel,
@@ -58,13 +60,13 @@ class ChannelBuilder<S extends StoreBase, V> extends StatelessWidget {
   final ValueWidgetBuilder<V> builder;
   
   /// 
-  final InitWithValueCallback<S, V> onInit;
+  final InitWithValueCallback<V> onInit;
   
   /// 
-  final DisposeCallback<S> onDispose;
+  final DisposeCallback onDispose;
   
   /// 
-  final OnUpdatedCallback<S, V> onUpdated;
+  final OnUpdatedCallback<V> onUpdated;
   
   /// As a performance optimization, 
   /// the Widget can be rebuilt only when the [V] changes. 
@@ -76,8 +78,8 @@ class ChannelBuilder<S extends StoreBase, V> extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    final S store = StoreProvider.of<S>(context);
-    return new _ChannelBuilder<S, V>(
+    final store = StoreProvider.of(context);
+    return new _ChannelBuilder<V>(
       store: store,
       channel: channel,
       builder: builder,
@@ -89,7 +91,7 @@ class ChannelBuilder<S extends StoreBase, V> extends StatelessWidget {
   }
 }
 
-class _ChannelBuilder<S extends StoreBase, V> extends StatefulWidget {
+class _ChannelBuilder<V> extends StatefulWidget {
   _ChannelBuilder({
     Key key,
     @required this.store,
@@ -105,21 +107,21 @@ class _ChannelBuilder<S extends StoreBase, V> extends StatefulWidget {
       assert(builder != null),
       super(key: key);
   
-  final S store;
+  final Store store;
   final Channel<V> channel;
   final ValueWidgetBuilder<V> builder;
-  final InitWithValueCallback<S, V> onInit;
-  final DisposeCallback<S> onDispose;
-  final OnUpdatedCallback<S, V> onUpdated;
+  final InitWithValueCallback<V> onInit;
+  final DisposeCallback onDispose;
+  final OnUpdatedCallback<V> onUpdated;
   final bool distinct;
   
   @override
   State<StatefulWidget> createState() {
-    return new _ChannelBuilderState<S, V>();
+    return new _ChannelBuilderState<V>();
   }
 }
 
-class _ChannelBuilderState<S extends StoreBase, V> extends State<_ChannelBuilder<S, V>> {
+class _ChannelBuilderState<V> extends State<_ChannelBuilder<V>> {
   @override
   void initState() {
     super.initState();
