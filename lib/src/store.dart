@@ -67,7 +67,7 @@ class Store {
   
   // 指定したkeyに登録したcallbackを解除する
   // 通常、この関数はState.disposeから呼び出される
-  void _removeListener(String name, ValueCallback callback) {
+  void _removeListener<V>(String name, ValueCallback<V> callback) {
     final holder = this._holders[name];
     if (holder != null) {
       holder.removeListener(callback);
@@ -96,19 +96,19 @@ class Channel<V> {
   }
   
   void set(Store store, V value, [Object error]) {
-    store._set(name, value: value, error: error, volatile: volatile);
+    store._set<V>(name, value: value, error: error, volatile: volatile);
   }
   
   void error(Store store, Object error) {
-    store._set(name, value: null, error: error, volatile: volatile);
+    store._set<V>(name, value: null, error: error, volatile: volatile);
   }
   
   void addListener(Store store, ValueCallback<V> callback, {bool distinct = false}) {
-    store._addListener(name, callback, distinct: distinct, volatile: volatile);
+    store._addListener<V>(name, callback, distinct: distinct, volatile: volatile);
   }
   
   void removeListener(Store store, ValueCallback<V> callback) {
-    store._removeListener(name, callback);
+    store._removeListener<V>(name, callback);
   }
   
   @override
