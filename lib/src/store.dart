@@ -14,9 +14,9 @@ import 'value.dart';
 /// 
 /// Extends [Store] to provide app's Store.
 class Store {
-  const Store();
+  Store();
   
-  final Map<String, _Holder> _holders = const <String, _Holder>{};
+  final Map<String, _Holder> _holders = <String, _Holder>{};
   
   static Store of(BuildContext context) {
     return StoreProvider.of(context);
@@ -138,7 +138,7 @@ class _Holder<V> {
   
   void setValue(V value, Object error) {
     final bool changed = (value != _value?.value || error != _value?.error);
-    _value = new Value(value, error);
+    _value = new Value<V>(value, error);
     _listeners.forEach((ValueCallback<V> listener, bool distinct) {
       if (changed || !distinct) {
         listener(_value);
