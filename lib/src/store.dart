@@ -1,10 +1,11 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'provider.dart';
+import 'action.dart';
 import 'channel_builder.dart';
+import 'provider.dart';
+import 'value.dart';
 
 /// A Flux store that holds the app state.
 ///
@@ -13,11 +14,9 @@ import 'channel_builder.dart';
 /// 
 /// Extends [Store] to provide app's Store.
 class Store {
-  Store()
-    :
-      _holders = <String, _Holder>{};
+  const Store();
   
-  final Map<String, _Holder> _holders;
+  final Map<String, _Holder> _holders = const <String, _Holder>{};
   
   static Store of(BuildContext context) {
     return StoreProvider.of(context);
@@ -26,11 +25,6 @@ class Store {
   /// Runs a [action].
   Future<void> action(Action action) {
     return action.run(this);
-  }
-  
-  /// Creates a [Channel] for the given [name].
-  Channel<V> channel<V>(String name, {bool volatile = true}) {
-    return new Channel<V>(this, name, volatile: volatile);
   }
   
   /// Returns the value for the given [name] or null if [name] is not in the [Store].
@@ -84,33 +78,52 @@ class Store {
   }
 }
 
-abstract class Action {
-  Future<void> run(Store store);
-}
-
-/// 
-@immutable
-class Value<V> {
-  /// 
-  Value(this.value, this.error);
+/// Example:
+///     class Channels {
+///       static Channel<String> myName(Store store) {
+///         return store.channel("my-name", volatile: false);
+///       }
+///     }
+class Channel<V> {
+  const Channel(this.name, {this.volatile = true});
   
-  /// 
-  Value.empty() : this(null, null);
+  final String name;
   
-  /// 
-  final V value;
+  final bool volatile;
   
-  /// 
-  final Object error;
-  
-  /// 
-  bool get isEmpty {
-    return value == null && error == null;
+  Value<V> get(Store store) {
+    return store._get<V>(name);
   }
   
-  /// 
-  bool get isNotEmpty {
-    return !isEmpty;
+  void set(Store store, V value, [Object error]) {
+    store._set(name, value: value, error: error, volatile: volatile);
+  }
+  
+  void error(Store store, Object error) {
+    store._set(name, value: null, error: error, volatile: volatile);
+  }
+  
+  void addListener(Store store, ValueCallback<V> callback, {bool distinct = false}) {
+    store._addListener(name, callback, distinct: distinct, volatile: volatile);
+  }
+  
+  void removeListener(Store store, ValueCallback<V> callback) {
+    store._removeListener(name, callback);
+  }
+  
+  @override
+  int get hashCode {
+    return identityHashCode(name) ^ identityHashCode(volatile);
+  }
+  
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is Channel
+      && other.volatile == volatile
+      && other.name == name;
   }
 }
 
@@ -145,56 +158,5 @@ class _Holder<V> {
   void removeListener(ValueCallback<V> listener) {
     assert(listener != null);
     _listeners.remove(listener);
-  }
-}
-
-/// Example:
-///     class Channels {
-///       static Channel<String> myName(Store store) {
-///         return store.channel("my-name", volatile: false);
-///       }
-///     }
-class Channel<V> {
-  const Channel(this.store, this.name, {this.volatile = true});
-  
-  final Store store;
-  
-  final String name;
-  
-  final bool volatile;
-  
-  Value<V> get() {
-    return store._get<V>(name);
-  }
-  
-  void set(V value, [Object error]) {
-    store._set(name, value: value, error: error, volatile: volatile);
-  }
-  
-  void error(Object error) {
-    store._set(name, value: null, error: error, volatile: volatile);
-  }
-  
-  void addListener(ValueCallback<V> callback, {bool distinct = false}) {
-    store._addListener(name, callback, distinct: distinct, volatile: volatile);
-  }
-  
-  void removeListener(ValueCallback<V> callback) {
-    store._removeListener(name, callback);
-  }
-  
-  @override
-  int get hashCode {
-    return identityHashCode(store) ^ identityHashCode(name);
-  }
-  
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    return other is Channel
-      && other.store == store
-      && other.name == name;
   }
 }

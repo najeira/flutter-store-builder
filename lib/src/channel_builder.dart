@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
 
-import 'store.dart';
 import 'provider.dart';
+import 'store.dart';
+import 'value.dart';
 
 typedef ValueCallback<V>(Value<V> value);
 
@@ -36,7 +37,7 @@ typedef DisposeCallback = void Function(
 typedef OnUpdatedCallback<V> = void Function(
   Store store, Value<V> value);
 
-/// Build a widget based on the state of the [Store].
+/// Build a widget based on the value of the [Channel].
 /// 
 /// Every time the value of [channel] changes, the Widget will be rebuilt.
 class ChannelBuilder<V> extends StatelessWidget {
@@ -125,9 +126,9 @@ class _ChannelBuilderState<V> extends State<_ChannelBuilder<V>> {
   @override
   void initState() {
     super.initState();
-    widget.channel.addListener(_onValueUpdated, distinct: widget.distinct);
+    widget.channel.addListener(widget.store, _onValueUpdated, distinct: widget.distinct);
     if (widget.onInit != null) {
-      final Value<V> value = widget.channel.get();
+      final Value<V> value = widget.channel.get(widget.store);
       widget.onInit(widget.store, value);
     }
   }
@@ -135,9 +136,9 @@ class _ChannelBuilderState<V> extends State<_ChannelBuilder<V>> {
   @override
   void didUpdateWidget(_ChannelBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.channel != widget.channel) {
-      oldWidget.channel.removeListener(_onValueUpdated);
-      widget.channel.addListener(_onValueUpdated, distinct: widget.distinct);
+    if (oldWidget.channel != widget.channel || oldWidget.store != widget.store) {
+      oldWidget.channel.removeListener(oldWidget.store, _onValueUpdated);
+      widget.channel.addListener(widget.store, _onValueUpdated, distinct: widget.distinct);
     }
   }
   
