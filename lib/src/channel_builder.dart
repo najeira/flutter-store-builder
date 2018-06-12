@@ -144,7 +144,7 @@ class _ChannelBuilderState<V> extends State<_ChannelBuilder<V>> {
   
   @override
   void dispose() {
-    widget.channel.removeListener(_onValueUpdated);
+    widget.channel.removeListener(widget.store, _onValueUpdated);
     if (widget.onDispose != null) {
       widget.onDispose(widget.store);
     }
@@ -153,7 +153,7 @@ class _ChannelBuilderState<V> extends State<_ChannelBuilder<V>> {
   
   @override
   Widget build(BuildContext context) {
-    final Value<V> value = widget.channel.get();
+    final Value<V> value = widget.channel.get(widget.store);
     return widget.builder(context, value);
   }
   
