@@ -123,14 +123,21 @@ class _ChannelBuilder<V> extends StatefulWidget {
 }
 
 class _ChannelBuilderState<V> extends State<_ChannelBuilder<V>> {
+  bool _initState = false;
+  
   @override
   void initState() {
     super.initState();
+    
+    // call addListener before onInit to hold the value of the channel.
+    widget.channel.addListener(widget.store, _onValueUpdated, distinct: widget.distinct);
+    
     if (widget.onInit != null) {
       final Value<V> value = widget.channel.get(widget.store);
       widget.onInit(widget.store, value);
     }
-    widget.channel.addListener(widget.store, _onValueUpdated, distinct: widget.distinct);
+    
+    _initState = true;
   }
   
   @override
@@ -161,7 +168,7 @@ class _ChannelBuilderState<V> extends State<_ChannelBuilder<V>> {
     if (widget.onUpdated != null) {
       widget.onUpdated(widget.store, value);
     }
-    if (mounted) {
+    if (mounted && _initState) {
       setState(() {});
     }
   }
