@@ -165,10 +165,10 @@ class _ChannelBuilderState<V> extends State<_ChannelBuilder<V>> {
   }
   
   void _onValueUpdated(Value<V> value) {
-    if (widget.onUpdated != null) {
-      widget.onUpdated(widget.store, value);
-    }
     if (mounted && _initState) {
+      if (widget.onUpdated != null) {
+        widget.onUpdated(widget.store, value);
+      }
       setState(() {});
     }
   }
