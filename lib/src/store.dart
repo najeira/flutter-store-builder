@@ -139,6 +139,12 @@ class _Holder<V> {
   void setValue(V value, Object error) {
     final bool changed = (value != _value?.value || error != _value?.error);
     _value = new Value<V>(value, error);
+    new Future.delayed(Duration.zero, () {
+      _callListeners(changed);
+    });
+  }
+  
+  void _callListeners(bool changed) {
     _listeners.forEach((ValueCallback<V> listener, bool distinct) {
       if (changed || !distinct) {
         listener(_value);

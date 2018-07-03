@@ -123,8 +123,6 @@ class _ChannelBuilder<V> extends StatefulWidget {
 }
 
 class _ChannelBuilderState<V> extends State<_ChannelBuilder<V>> {
-  bool _initState = false;
-  
   @override
   void initState() {
     super.initState();
@@ -136,8 +134,6 @@ class _ChannelBuilderState<V> extends State<_ChannelBuilder<V>> {
       final Value<V> value = widget.channel.get(widget.store);
       widget.onInit(widget.store, value);
     }
-    
-    _initState = true;
   }
   
   @override
@@ -165,7 +161,7 @@ class _ChannelBuilderState<V> extends State<_ChannelBuilder<V>> {
   }
   
   void _onValueUpdated(Value<V> value) {
-    if (mounted && _initState) {
+    if (mounted) {
       if (widget.onUpdated != null) {
         widget.onUpdated(widget.store, value);
       }
