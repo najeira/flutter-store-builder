@@ -113,7 +113,9 @@ class Channel<V> {
   
   @override
   int get hashCode {
-    return identityHashCode(name) ^ identityHashCode(volatile);
+    final a = name?.hashCode ?? 23;
+    final b = volatile?.hashCode ?? 41;
+    return a ^ b;
   }
   
   @override
