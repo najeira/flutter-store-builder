@@ -4,6 +4,10 @@ Flux store and builder for Flutter.
 
 Version: 0.2.0
 
+## Install
+
+See [pub.dartlang.org/packages/store_builder](https://pub.dartlang.org/packages/store_builder#-installing-tab-)
+
 ## Usage
 
 Add `StoreProvider` to your app. `Store` represents the state of the entire
