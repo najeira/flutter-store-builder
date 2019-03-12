@@ -5,7 +5,7 @@ import 'store.dart';
 /// Provides a Flux [Store] to all ancestors of this Widget.
 /// This should generally be a root widget in your App.
 /// Connect to the [Store] provided by this Widget using a 
-/// [ChannelBuilder].
+/// [StoreBuilder].
 class StoreProvider extends InheritedWidget {
   final Store store;
   

@@ -1,0 +1,10 @@
+# This file tracks properties of this Flutter project.
+# Used by Flutter tool to assess capabilities and perform upgrades etc.
+#
+# This file should be version controlled and should not be manually edited.
+
+version:
+  revision: 82c92ddd036fc20c0b9fb0c54ea078e0cd271b79
+  channel: cartune-1.2.1
+
+project_type: app
