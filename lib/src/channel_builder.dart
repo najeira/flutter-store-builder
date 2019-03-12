@@ -10,7 +10,7 @@ typedef ValueCallback<V>(Value<V> value);
 typedef ValueWidgetBuilder<V> = Widget Function(
   BuildContext context, Value<V> value);
 
-/// Called when the [ChannelBuilder] is inserted into the Widget tree.
+/// Called when the [StoreBuilder] is inserted into the Widget tree.
 ///
 /// It is run in the [State.initState] method.
 /// 
@@ -19,7 +19,7 @@ typedef ValueWidgetBuilder<V> = Widget Function(
 typedef InitWithValueCallback<V> = void Function(
   Store store, Value<V> value);
 
-/// Called when the [ChannelBuilder] is removed from the Widget tree.
+/// Called when the [StoreBuilder] is removed from the Widget tree.
 ///
 /// It is run in the [State.dispose] method.
 ///
@@ -37,25 +37,45 @@ typedef DisposeCallback = void Function(
 typedef OnUpdatedCallback<V> = void Function(
   Store store, Value<V> value);
 
-/// Build a widget based on the value of the [Channel].
+/// Build a widget based on the value of the [name].
 /// 
-/// Every time the value of [channel] changes, the Widget will be rebuilt.
-class ChannelBuilder<V> extends StatelessWidget {
-  ChannelBuilder({
+/// Every time the value of [name] changes, the Widget will be rebuilt.
+/// 
+/// Example:
+///   return StoreBuilder<Article>(
+///     name: "article-${id}",
+///     onInit: (Store store, Value<Article> value) {
+///       if (value.value == null) {
+///         store.action(LoadArticleAction(id));
+///       }
+///     },
+///     builder: (BuildContext context, Value<Article> value) {
+///       if (value.error != null) {
+///         return ErrorWidget(value.error);
+///       } else if (value.value == null) {
+///         return LoadingWidget();
+///       }
+///       return YourWidget(value.value);
+///     },
+///   );
+/// 
+class StoreBuilder<V> extends StatelessWidget {
+  StoreBuilder({
     Key key,
-    @required this.channel,
+    @required this.name,
     @required this.builder,
     this.onInit,
     this.onDispose,
     this.onUpdated,
     this.distinct = false,
+    this.volatile = false,
   })
-    : assert(channel != null),
+    : assert(name != null),
       assert(builder != null),
       super(key: key);
   
   /// A key to the value of the [Store].
-  final Channel<V> channel;
+  final String name;
   
   /// 
   final ValueWidgetBuilder<V> builder;
@@ -74,80 +94,108 @@ class ChannelBuilder<V> extends StatelessWidget {
   /// 
   /// In order for this to work correctly, you must implement [==] and
   /// [hashCode] for the [V], and set the [distinct] to true when creating
-  /// your [ChannelBuilder].
+  /// your [StoreBuilder].
   final bool distinct;
+  
+  final bool volatile;
   
   @override
   Widget build(BuildContext context) {
     final store = StoreProvider.of(context);
-    return new _ChannelBuilder<V>(
+    return new _StoreBuilder<V>(
       store: store,
-      channel: channel,
+      name: name,
       builder: builder,
       onInit: onInit,
       onDispose: onDispose,
       onUpdated: onUpdated,
       distinct: distinct,
+      volatile: volatile,
     );
   }
 }
 
-class _ChannelBuilder<V> extends StatefulWidget {
-  _ChannelBuilder({
+class _StoreBuilder<V> extends StatefulWidget {
+  _StoreBuilder({
     Key key,
     @required this.store,
-    @required this.channel,
+    @required this.name,
     @required this.builder,
     this.onInit,
     this.onDispose,
     this.onUpdated,
     this.distinct,
+    this.volatile,
   })
     : assert(store != null),
-      assert(channel != null),
+      assert(name != null),
       assert(builder != null),
       super(key: key);
   
   final Store store;
-  final Channel<V> channel;
+  final String name;
   final ValueWidgetBuilder<V> builder;
   final InitWithValueCallback<V> onInit;
   final DisposeCallback onDispose;
   final OnUpdatedCallback<V> onUpdated;
   final bool distinct;
+  final bool volatile;
   
   @override
   State<StatefulWidget> createState() {
-    return new _ChannelBuilderState<V>();
+    return new _StoreBuilderState<V>();
   }
 }
 
-class _ChannelBuilderState<V> extends State<_ChannelBuilder<V>> {
+class _StoreBuilderState<V> extends State<_StoreBuilder<V>> {
   @override
   void initState() {
     super.initState();
     
-    // call addListener before onInit to hold the value of the channel.
-    widget.channel.addListener(widget.store, _onValueUpdated, distinct: widget.distinct);
+    // call addListener before onInit to hold the value of the name.
+    _subscribe(widget);
     
+    _callOnInit();
+  }
+  
+  @override
+  void didUpdateWidget(_StoreBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.name != widget.name || oldWidget.store != widget.store) {
+      _unsubscribe(oldWidget);
+      _subscribe(widget);
+      
+      // call onInit to update StoreBuilder
+      _callOnInit();
+    }
+  }
+  
+  void _callOnInit() {
     if (widget.onInit != null) {
-      final Value<V> value = widget.channel.get(widget.store);
+      final Value<V> value = widget.store.get(widget.name);
       widget.onInit(widget.store, value);
     }
   }
   
-  @override
-  void didUpdateWidget(_ChannelBuilder oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.channel != widget.channel || oldWidget.store != widget.store) {
-      oldWidget.channel.removeListener(oldWidget.store, _onValueUpdated);
-      widget.channel.addListener(widget.store, _onValueUpdated, distinct: widget.distinct);
-    }
+  void _subscribe(_StoreBuilder w) {
+    w.store.addListener<V>(
+      w.name,
+      _onValueUpdated,
+      distinct: w.distinct,
+      volatile: w.volatile,
+    );
+  }
+  
+  void _unsubscribe(_StoreBuilder w) {
+    w.store.removeListener<V>(
+      w.name,
+      _onValueUpdated,
+    );
   }
   
   @override
   void dispose() {
-    widget.channel.removeListener(widget.store, _onValueUpdated);
+    _unsubscribe(widget);
     if (widget.onDispose != null) {
       widget.onDispose(widget.store);
     }
@@ -156,7 +204,7 @@ class _ChannelBuilderState<V> extends State<_ChannelBuilder<V>> {
   
   @override
   Widget build(BuildContext context) {
-    final Value<V> value = widget.channel.get(widget.store);
+    final Value<V> value = widget.store.get(widget.name);
     return widget.builder(context, value);
   }
   
