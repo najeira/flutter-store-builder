@@ -24,25 +24,22 @@ class Store {
   
   /// Returns the value for the given [name] or null if [name] is not in the [Store].
   Value<V> get<V>(String name) {
-    final holder = this._holders[name];
-    if (holder != null && holder._value != null) {
-      return holder._value as Value<V>;
-    }
-    return new Value<V>.empty();
+    final _Holder<V> holder = _holders[name];
+    return holder?._value ?? Value<V>.empty();
   }
   
-  /// Stores the [value] for the given [name] to [Store].
-  void set<V>(String name, {
-    V value,
+  /// Stores the [value] for the given [name] to this [Store].
+  void set<V>(String name, V value, {
     Object error,
     bool volatile = true,
   }) {
-    var holder = this._holders[name];
+    _Holder<V> holder = _holders[name];
     if (holder == null && !volatile) {
-      holder = new _Holder<V>(volatile);
-      this._holders[name] = holder;
+      // creates a new holder if it is not volatile.
+      holder = _Holder<V>();
+      _holders[name] = holder;
     }
-    holder?.setValue(value, error);
+    holder?.setValue(value, error, volatile);
   }
   
   // 指定したkeyが更新された場合に通知を受け取るcallbackを登録する
@@ -50,12 +47,11 @@ class Store {
   // subscribeした場合は、State.disposeでunsubscribeする
   void addListener<V>(String name, ValueCallback<V> callback, {
     bool distinct = false,
-    bool volatile = true,
   }) {
-    _Holder<V> holder = this._holders[name];
+    _Holder<V> holder = _holders[name];
     if (holder == null) {
-      holder = new _Holder<V>(volatile);
-      this._holders[name] = holder;
+      holder = _Holder<V>();
+      _holders[name] = holder;
     }
     holder.addListener(callback, distinct: distinct);
   }
@@ -63,29 +59,30 @@ class Store {
   // 指定したkeyに登録したcallbackを解除する
   // 通常、この関数はState.disposeから呼び出される
   void removeListener<V>(String name, ValueCallback<V> callback) {
-    final holder = this._holders[name];
+    final holder = _holders[name];
     if (holder != null) {
       holder.removeListener(callback);
       if (holder.disposable) {
-        this._holders.remove(name);
+        _holders.remove(name);
       }
     }
   }
 }
 
 class _Holder<V> {
-  _Holder(this.volatile);
-  
-  final bool volatile;
-  
   final Map<ValueCallback<V>, bool> _listeners = <ValueCallback<V>, bool>{};
   
   Value<V> _value;
   
-  void setValue(V value, Object error) {
+  bool _volatile = true;
+  
+  void setValue(V value, Object error, bool volatile) {
     final bool changed = (value != _value?.value || error != _value?.error);
-    _value = new Value<V>(value, error);
-    new Future.delayed(Duration.zero, () {
+    if (changed || _value == null) {
+      _value = Value<V>(value, error);
+    }
+    _volatile = volatile;
+    Future.delayed(Duration.zero, () {
       _callListeners(changed);
     });
   }
@@ -99,7 +96,7 @@ class _Holder<V> {
   }
   
   bool get disposable {
-    return volatile && _listeners.length <= 0;
+    return _volatile && _listeners.length <= 0;
   }
   
   void addListener(ValueCallback<V> listener, {bool distinct = false}) {

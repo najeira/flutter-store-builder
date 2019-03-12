@@ -68,7 +68,6 @@ class StoreBuilder<V> extends StatelessWidget {
     this.onDispose,
     this.onUpdated,
     this.distinct = false,
-    this.volatile = false,
   })
     : assert(name != null),
       assert(builder != null),
@@ -97,8 +96,6 @@ class StoreBuilder<V> extends StatelessWidget {
   /// your [StoreBuilder].
   final bool distinct;
   
-  final bool volatile;
-  
   @override
   Widget build(BuildContext context) {
     final store = StoreProvider.of(context);
@@ -110,7 +107,6 @@ class StoreBuilder<V> extends StatelessWidget {
       onDispose: onDispose,
       onUpdated: onUpdated,
       distinct: distinct,
-      volatile: volatile,
     );
   }
 }
@@ -125,7 +121,6 @@ class _StoreBuilder<V> extends StatefulWidget {
     this.onDispose,
     this.onUpdated,
     this.distinct,
-    this.volatile,
   })
     : assert(store != null),
       assert(name != null),
@@ -139,7 +134,6 @@ class _StoreBuilder<V> extends StatefulWidget {
   final DisposeCallback onDispose;
   final OnUpdatedCallback<V> onUpdated;
   final bool distinct;
-  final bool volatile;
   
   @override
   State<StatefulWidget> createState() {
@@ -182,7 +176,6 @@ class _StoreBuilderState<V> extends State<_StoreBuilder<V>> {
       w.name,
       _onValueUpdated,
       distinct: w.distinct,
-      volatile: w.volatile,
     );
   }
   
