@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import 'action.dart';
-import 'channel_builder.dart';
+import 'builder.dart';
 import 'provider.dart';
 import 'value.dart';
 
