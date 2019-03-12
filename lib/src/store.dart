@@ -113,7 +113,9 @@ class Channel<V> {
   
   @override
   int get hashCode {
-    return identityHashCode(name) ^ identityHashCode(volatile);
+    final a = name?.hashCode ?? 23;
+    final b = volatile?.hashCode ?? 41;
+    return a ^ b;
   }
   
   @override
@@ -139,6 +141,12 @@ class _Holder<V> {
   void setValue(V value, Object error) {
     final bool changed = (value != _value?.value || error != _value?.error);
     _value = new Value<V>(value, error);
+    new Future.delayed(Duration.zero, () {
+      _callListeners(changed);
+    });
+  }
+  
+  void _callListeners(bool changed) {
     _listeners.forEach((ValueCallback<V> listener, bool distinct) {
       if (changed || !distinct) {
         listener(_value);
