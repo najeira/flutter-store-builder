@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   store_builder:
-    path: ../../../flutter-flux
+    path: ../../../flutter-store-builder
 
 dev_dependencies:
   flutter_test:

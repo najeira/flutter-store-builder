@@ -2,7 +2,7 @@ name: store_builder
 description: Flux store and builder for Flutter
 author: najeira <najeira@gmail.com>
 version: 0.2.0
-homepage: https://github.com/najeira/flutter-flux
+homepage: https://github.com/najeira/flutter-store-builder
 
 dependencies:
   flutter:
