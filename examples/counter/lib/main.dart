@@ -2,22 +2,26 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:store_builder/store_builder.dart';
+
+const String _title = 'Flux store builder';
+
+const String _counterName = 'identifier for the counter';
+
 void main() => runApp(MaterialApp(
-      title: 'Flux store builder',
+      title: _title,
       home: StoreProvider(
         store: Store(),
         child: MyHomePage(),
       ),
     ));
 
-const String _counterName = 'this is identifier for counter';
-
 class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Flux store builder'),
+        title: const Text(_title),
       ),
       body: Center(
         child: StoreBuilder<int>(
@@ -30,7 +34,7 @@ class MyHomePage extends StatelessWidget {
                   'You have pushed the button this many times:',
                 ),
                 Text(
-                  '${value.value}',
+                  '${value.value ?? 0}',
                   style: Theme.of(context).textTheme.display1,
                 ),
               ],
@@ -52,7 +56,7 @@ class MyHomePage extends StatelessWidget {
 
 class _IncrementCounterAction implements Action {
   Future<void> run(Store store) async {
-    final int counter = store.get<int>(_counterName);
+    final int counter = store.get<int>(_counterName).value ?? 0;
     store.set<int>(_counterName, counter + 1);
   }
 }
