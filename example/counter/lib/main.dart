@@ -6,7 +6,13 @@ import 'package:store_builder/store_builder.dart';
 
 const String _title = 'Flux store builder';
 
-const String _counterName = 'identifier for the counter';
+class Names {
+  static const String counter = 'identifier for the counter';
+}
+
+class Values {
+  static Value<int> counter(Store store) => store.value<int>(Names.counter);
+}
 
 void main() => runApp(MaterialApp(
       title: _title,
@@ -25,7 +31,7 @@ class MyHomePage extends StatelessWidget {
       ),
       body: Center(
         child: StoreBuilder<int>(
-          name: _counterName,
+          name: Names.counter,
           builder: (BuildContext context, Value<int> value) {
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -56,7 +62,8 @@ class MyHomePage extends StatelessWidget {
 
 class _IncrementCounterAction implements Action {
   Future<void> run(Store store) async {
-    final int counter = store.get<int>(_counterName).value ?? 0;
-    store.set<int>(_counterName, counter + 1);
+    final Value<int> value = Values.counter(store);
+    final int count = value.value ?? 0;
+    value.value = count + 1;
   }
 }

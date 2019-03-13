@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 
 import 'provider.dart';
 import 'store.dart';
-import 'value.dart';
 
 typedef ValueCallback<V>(Value<V> value);
 
@@ -161,7 +160,7 @@ class _StoreBuilderState<V> extends State<_StoreBuilder<V>> {
 
   void _callOnInit() {
     if (widget.onInit != null) {
-      final Value<V> value = widget.store.get(widget.name);
+      final Value<V> value = widget.store.value(widget.name);
       widget.onInit(widget.store, value);
     }
   }
@@ -192,7 +191,7 @@ class _StoreBuilderState<V> extends State<_StoreBuilder<V>> {
 
   @override
   Widget build(BuildContext context) {
-    final Value<V> value = widget.store.get(widget.name);
+    final Value<V> value = widget.store.value(widget.name);
     return widget.builder(context, value);
   }
 

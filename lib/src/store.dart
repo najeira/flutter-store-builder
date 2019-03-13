@@ -5,14 +5,16 @@ import 'package:flutter/widgets.dart';
 import 'action.dart';
 import 'builder.dart';
 import 'provider.dart';
-import 'value.dart';
 
 /// A Flux store that holds the app state.
 class Store {
   Store();
 
-  final Map<String, _Holder> _holders = <String, _Holder>{};
+  final Map<String, _Entity> _entities = Map<String, _Entity>();
 
+  final Map<String, Map<ValueCallback, bool>> _listeners = Map<String, Map<ValueCallback, bool>>();
+
+  /// Returns the [Store] associated with [context].
   static Store of(BuildContext context) {
     return StoreProvider.of(context);
   }
@@ -22,94 +24,194 @@ class Store {
     return action.run(this);
   }
 
-  /// Returns the value for the given [name] or null if [name] is not in the [Store].
-  Value<V> get<V>(String name) {
-    final _Holder<V> holder = _holders[name];
-    return holder?._value ?? Value<V>.empty();
+  /// Returns the value for the given [name] or null if [name] is not in the
+  /// [Store].
+  Value<V> value<V>(String name) {
+    return Value<V>(store: this, name: name);
   }
 
-  /// Stores the [value] for the given [name] to this [Store].
-  void set<V>(
-    String name,
-    V value, {
+  _Entity<V> _getEntity<V>(String name) {
+    return _entities[name] as _Entity<V>;
+  }
+
+  void _setEntity<V>(String name, {
+    V value,
     Object error,
-    bool volatile = true,
   }) {
-    _Holder<V> holder = _holders[name];
-    if (holder == null && !volatile) {
-      // creates a new holder if it is not volatile.
-      holder = _Holder<V>();
-      _holders[name] = holder;
+    final _Entity<V> entity = _entities[name];
+    if (entity != null) {
+      final bool changed = entity.value != value || entity.error != error;
+      entity.value = value;
+      entity.error = error;
+      _callListeners(name, changed);
+    } else {
+      _entities[name] = _Entity<V>(value: value, error: error);
+      _callListeners(name, true);
     }
-    holder?.setValue(value, error, volatile);
   }
 
-  // 指定したkeyが更新された場合に通知を受け取るcallbackを登録する
+  void _setVolatile<V>(String name, bool volatile) {
+    volatile ??= true;
+
+    final _Entity<V> entity = _entities[name];
+    if (entity != null) {
+      entity.volatile = volatile;
+    } else {
+      _entities[name] = _Entity<V>(volatile: volatile);
+    }
+  }
+
+  // 指定したkeyが更新された場合に通知を受け取るlistenerを登録する
   // 通常、この関数はState.initStateから呼び出される
   // subscribeした場合は、State.disposeでunsubscribeする
   void addListener<V>(
     String name,
-    ValueCallback<V> callback, {
+    ValueCallback<V> listener, {
     bool distinct = false,
   }) {
-    _Holder<V> holder = _holders[name];
-    if (holder == null) {
-      holder = _Holder<V>();
-      _holders[name] = holder;
+    assert(name != null);
+    assert(listener != null);
+
+    Map<ValueCallback<V>, bool> map = _listeners[name];
+    if (map == null) {
+      map = Map<ValueCallback<V>, bool>();
+      _listeners[name] = map;
     }
-    holder.addListener(callback, distinct: distinct);
+    map[listener] = distinct;
   }
 
-  // 指定したkeyに登録したcallbackを解除する
+  // 指定したkeyに登録したlistenerを解除する
   // 通常、この関数はState.disposeから呼び出される
-  void removeListener<V>(String name, ValueCallback<V> callback) {
-    final holder = _holders[name];
-    if (holder != null) {
-      holder.removeListener(callback);
-      if (holder.disposable) {
-        _holders.remove(name);
-      }
+  void removeListener<V>(String name, ValueCallback<V> listener) {
+    assert(name != null);
+    assert(listener != null);
+
+    final Map<ValueCallback<V>, bool> map = _listeners[name];
+    if (map == null) {
+      return;
     }
+
+    map.remove(listener);
+    if (map.isNotEmpty) {
+      return;
+    }
+
+    // no listeners, remove the volatile value.
+    final _Entity<V> entity = _entities[name];
+    if (entity?.volatile ?? false) {
+      _entities.remove(name);
+    }
+  }
+
+  void _callListeners<V>(String name, bool changed) {
+    Future.delayed(Duration.zero, () {
+      _callListenersImpl(name, changed);
+    });
+  }
+
+  void _callListenersImpl<V>(String name, bool changed) {
+    final Map<ValueCallback<V>, bool> map = _listeners[name];
+    if (map == null) {
+      return;
+    }
+
+    final Value<V> v = value<V>(name);
+    map.forEach((ValueCallback<V> listener, bool distinct) {
+      if (changed || !distinct) {
+        listener(v);
+      }
+    });
   }
 }
 
-class _Holder<V> {
-  final Map<ValueCallback<V>, bool> _listeners = <ValueCallback<V>, bool>{};
+class Value<V> {
+  ///
+  Value({
+    @required this.store,
+    @required this.name,
+  })  : assert(store != null),
+        assert(name != null);
 
-  Value<V> _value;
+  final Store store;
 
-  bool _volatile = true;
+  final String name;
 
-  void setValue(V value, Object error, bool volatile) {
-    final bool changed = (value != _value?.value || error != _value?.error);
-    if (changed || _value == null) {
-      _value = Value<V>(value, error);
-    }
-    _volatile = volatile;
-    Future.delayed(Duration.zero, () {
-      _callListeners(changed);
-    });
+  _Entity<V> get _entity => store._getEntity<V>(name);
+
+  ///
+  V get value => _entity?.value;
+
+  ///
+  set value(V newValue) {
+    final _Entity<V> entity = _entity;
+    store._setEntity(name, value: newValue, error: entity?.error);
   }
 
-  void _callListeners(bool changed) {
-    _listeners.forEach((ValueCallback<V> listener, bool distinct) {
-      if (changed || !distinct) {
-        listener(_value);
-      }
-    });
+  ///
+  Object get error => _entity?.error;
+
+  ///
+  set error(Object newError) {
+    final _Entity<V> entity = _entity;
+    store._setEntity(name, value: entity?.value, error: newError);
   }
 
-  bool get disposable {
-    return _volatile && _listeners.length <= 0;
+  ///
+  bool get isEmpty {
+    final _Entity<V> entity = _entity;
+    return entity?.value == null && entity?.error == null;
+  }
+
+  ///
+  bool get isNotEmpty {
+    return !isEmpty;
+  }
+
+  ///
+  bool get volatile => _entity?.volatile;
+
+  ///
+  set volatile(bool newVolatile) {
+    store._setVolatile(name, newVolatile);
   }
 
   void addListener(ValueCallback<V> listener, {bool distinct = false}) {
-    assert(listener != null);
-    _listeners[listener] = distinct;
+    store.addListener(name, listener, distinct: distinct);
   }
 
   void removeListener(ValueCallback<V> listener) {
-    assert(listener != null);
-    _listeners.remove(listener);
+    store.removeListener(name, listener);
   }
+
+  @override
+  int get hashCode {
+    final a = store?.hashCode ?? 41;
+    final b = name?.hashCode ?? 23;
+    return a ^ b;
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is Value<V>
+      && other.store == store
+      && other.name == name;
+  }
+}
+
+/// Substantial of the value.
+class _Entity<V> {
+  _Entity({
+    this.value,
+    this.error,
+    this.volatile = true,
+  });
+
+  V value;
+
+  Object error;
+
+  bool volatile;
 }
