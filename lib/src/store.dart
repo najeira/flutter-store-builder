@@ -45,10 +45,10 @@ class Store {
       final bool changed = entity.value != value || entity.error != error;
       entity.value = value;
       entity.error = error;
-      _callListeners(name, changed);
+      _callListeners<V>(name, changed);
     } else {
       _entities[name] = _Entity<V>(value: value, error: error);
-      _callListeners(name, true);
+      _callListeners<V>(name, true);
     }
   }
 
@@ -74,9 +74,9 @@ class Store {
     assert(name != null);
     assert(listener != null);
 
-    Map<ValueCallback<V>, bool> map = _listeners[name];
+    Map<ValueCallback, bool> map = _listeners[name];
     if (map == null) {
-      map = Map<ValueCallback<V>, bool>();
+      map = Map<ValueCallback, bool>();
       _listeners[name] = map;
     }
     map[listener] = distinct;
@@ -88,7 +88,7 @@ class Store {
     assert(name != null);
     assert(listener != null);
 
-    final Map<ValueCallback<V>, bool> map = _listeners[name];
+    final Map<ValueCallback, bool> map = _listeners[name];
     if (map == null) {
       return;
     }
@@ -107,18 +107,19 @@ class Store {
 
   void _callListeners<V>(String name, bool changed) {
     Future.delayed(Duration.zero, () {
-      _callListenersImpl(name, changed);
+      _callListenersImpl<V>(name, changed);
     });
   }
 
   void _callListenersImpl<V>(String name, bool changed) {
-    final Map<ValueCallback<V>, bool> map = _listeners[name];
+    final Map<ValueCallback, bool> map = _listeners[name];
     if (map == null) {
       return;
     }
 
     final Value<V> v = value<V>(name);
-    map.forEach((ValueCallback<V> listener, bool distinct) {
+    map.forEach((ValueCallback listener, bool distinct) {
+      assert(listener is ValueCallback<V>);
       if (changed || !distinct) {
         listener(v);
       }
