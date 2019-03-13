@@ -12,7 +12,8 @@ class Store {
 
   final Map<String, _Entity> _entities = Map<String, _Entity>();
 
-  final Map<String, Map<ValueCallback, bool>> _listeners = Map<String, Map<ValueCallback, bool>>();
+  final Map<String, Map<ValueCallback, bool>> _listeners =
+      Map<String, Map<ValueCallback, bool>>();
 
   /// Returns the [Store] associated with [context].
   static Store of(BuildContext context) {
@@ -34,7 +35,8 @@ class Store {
     return _entities[name] as _Entity<V>;
   }
 
-  void _setEntity<V>(String name, {
+  void _setEntity<V>(
+    String name, {
     V value,
     Object error,
   }) {
@@ -195,9 +197,7 @@ class Value<V> {
     if (identical(this, other)) {
       return true;
     }
-    return other is Value<V>
-      && other.store == store
-      && other.name == name;
+    return other is Value<V> && other.store == store && other.name == name;
   }
 }
 
