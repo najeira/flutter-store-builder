@@ -82,6 +82,7 @@ class Store {
       map = Map<ValueCallback, bool>();
       _listeners[name] = map;
     }
+
     map[listener] = distinct;
   }
 
@@ -118,7 +119,7 @@ class Store {
 
   void _callListenersImpl<V>(String name, bool changed) {
     final Map<ValueCallback, bool> map = _listeners[name];
-    if (map == null) {
+    if (map == null || map.isEmpty) {
       return;
     }
 
