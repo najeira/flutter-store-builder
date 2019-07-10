@@ -124,7 +124,7 @@ class YourWidget extends StatelessWidget {
     ...
     
     RaisedButton(
-      onTap() {
+      onPressed: () {
         incrementCounter(Store.of(context));
       },
       
