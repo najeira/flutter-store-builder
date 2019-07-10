@@ -64,6 +64,7 @@ class StoreBuilder<V> extends StatelessWidget {
     this.distinct = false,
   })  : assert(name != null),
         assert(builder != null),
+        assert(distinct != null),
         super(key: key);
 
   /// A key to the value of the [Store].
