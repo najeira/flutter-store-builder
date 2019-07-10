@@ -82,49 +82,7 @@ operations separate from Widgets.
 
 ### Clean architecture
 
-```dart
-class Names {
-  static const String counter = 'counter';
-  
-  ...
-  
-}
-
-class Values {
-  static Value<int> counter(Store store)
-      => store.value<int>(Names.counter);
-  
-  ...
-  
-}
-
-// UseCase privides domain service/usecase.
-class UseCase {
-  Future<void> increment(Store store) async {
-    final Value<int> value = Values.counter(store);
-    final int counter = value.value ?? 0;
-    value.value = counter + 1;
-  }
-}
-
-// global?
-final UseCase useCase = UseCase();
-```
-
-And widgets calls the usecase.
-
-```dart
-class YourWidget extends StatelessWidget {
-  
-  ...
-  
-  void incrementCounter() {
-    useCase.increment(Store.of(context));
-  }
-}
-```
-
-### Flux
+Managing names and values as constants may prevent mistakes.
 
 ```dart
 class Names {
@@ -141,25 +99,41 @@ class Values {
   ...
   
 }
+```
 
-class IncrementCounterAction implements Action {
-  Future<void> run(Store store) async {
-    final Value<int> value = Values.counter(store);
-    final int counter = value.value ?? 0;
-    value.value = counter + 1;
-  }
+Business logics are separated as UseCase in Clean Architecture.
+These do not depend on Widgets, but operates `Store` and `Value`s.
+
+```dart
+Future<void> incrementCounter(Store store) async {
+  final Value<int> value = Values.counter(store);
+  final int counter = value.value ?? 0;
+  value.value = counter + 1;
 }
 ```
 
-And widgets calls the action.
+Widgets calls usecases.
 
 ```dart
 class YourWidget extends StatelessWidget {
   
   ...
   
-  void incrementCounter() {
-    Store.of(context).action(IncrementCounterAction());
+  Widget build(BuildContext context) {
+    
+    ...
+    
+    RaisedButton(
+      onTap() {
+        incrementCounter(Store.of(context));
+      },
+      
+      ...
+      
+    ),
+    
+    ...
+    
   }
 }
 ```
