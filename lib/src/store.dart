@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 
 import 'provider.dart';
 
+/// 
+typedef StoreOperation = void Function(Store store);
 
 /// 
 typedef ValueCallback<V> = void Function(Value<V> value);
