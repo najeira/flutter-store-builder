@@ -93,7 +93,7 @@ class StoreBuilder<V> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final store = StoreProvider.of(context);
-    return new _StoreBuilder<V>(
+    return _StoreBuilder<V>(
       store: store,
       name: name,
       builder: builder,
@@ -130,7 +130,7 @@ class _StoreBuilder<V> extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return new _StoreBuilderState<V>();
+    return _StoreBuilderState<V>();
   }
 }
 
