@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import 'builder.dart';
 import 'provider.dart';
+
+
+/// 
+typedef ValueCallback<V> = void Function(Value<V> value);
 
 /// A Flux store that holds the app state.
 class Store {

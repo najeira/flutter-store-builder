@@ -3,8 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'provider.dart';
 import 'store.dart';
 
-typedef ValueCallback<V>(Value<V> value);
-
 /// Build a Widget using the [BuildContext] and [Value].
 typedef ValueWidgetBuilder<V> = Widget Function(
     BuildContext context, Value<V> value);
