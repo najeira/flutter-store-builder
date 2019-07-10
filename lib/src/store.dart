@@ -28,6 +28,10 @@ class Store {
     return Value<V>(store: this, name: name);
   }
 
+  bool contains(String name) {
+    return _entities.containsKey(name);
+  }
+
   _Entity<V> _getEntity<V>(String name) {
     return _entities[name] as _Entity<V>;
   }
