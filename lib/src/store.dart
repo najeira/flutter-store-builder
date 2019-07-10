@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import 'action.dart';
 import 'builder.dart';
 import 'provider.dart';
 
@@ -18,11 +17,6 @@ class Store {
   /// Returns the [Store] associated with [context].
   static Store of(BuildContext context) {
     return StoreProvider.of(context);
-  }
-
-  /// Runs a [action].
-  Future<void> action(Action action) {
-    return action.run(this);
   }
 
   /// Returns the value for the given [name] or null if [name] is not in the
