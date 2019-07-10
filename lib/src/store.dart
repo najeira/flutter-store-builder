@@ -166,6 +166,11 @@ class Value<V> {
   }
 
   ///
+  void update(V newValue, Object newError) {
+    store._setEntity(name, value: newValue, error: newError);
+  }
+
+  ///
   bool get isEmpty {
     final _Entity<V> entity = _entity;
     return entity?.value == null && entity?.error == null;
