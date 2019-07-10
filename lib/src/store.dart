@@ -101,6 +101,8 @@ class Store {
       return;
     }
 
+    _listeners.remove(name);
+
     // no listeners, remove the volatile value.
     final _Entity<V> entity = _entities[name];
     if (entity?.volatile ?? false) {
