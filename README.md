@@ -24,9 +24,9 @@ and rebuilt when the `StoredSubject` gets a new value.
 
 ## Usage
 
-Create a `Store` to holds state of the your app.
-
 ### Store
+
+Create a `Store` to holds state of the your app.
 
 ```dart
 final Store store = Store();
@@ -63,11 +63,9 @@ You can gets a `StoredSubject` from `Store` by `Store#use` method.
 After using `StoredSubject`, you must to call `StoredSubject#release`
 to tell `Store` of the end of use.
 
-When a value is sent to `StoredSubject`,
-all listeners observing the same `StoredSubject` are called.
-
-`StoreBuilder`s are rebuilt because it observes `StoredSubject`
-of the specified type and id.
+When a new value is sent to `StoredSubject`,
+all listeners observing the `StoredSubject` are called.
+That is, the related `StoreBuilder`s are also rebuilt.
 
 ```dart
 // gets a subject.
@@ -78,8 +76,25 @@ final int counter = subject.value ?? 0;
 
 // updates the value.
 subject.value = counter + 1;
-// subject.add(counter + 1)
+// subject.add(counter + 1);
+
+subject.release();
 ```
+
+## Data lifetime
+
+Data is kept in `Store` as long as there are `StoredSubject`s used.
+
+When all `StoredSubject`s with the same type and id are released,
+they are removed from `Store`.
+
+In other words, data management by reference counting.
+
+`StoreBuilder` uses `StoredSubject` internally,
+so `StoredSubject` will be kept as long as there is a related `StoreBuilder`.
+
+If you want to keep the data even if `StoreBuilder`s are gone,
+gets `StoredSubject` and do not release it.
 
 ## We are soliciting opinions
 
