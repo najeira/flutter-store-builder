@@ -1,3 +1,7 @@
+Still in development and not stable.
+
+v0.3 is not compatible with v0.2 and earlier.
+
 # store_builder
 
 Flux store and builder for Flutter.
@@ -8,132 +12,80 @@ See [pub.dartlang.org/packages/store_builder](https://pub.dartlang.org/packages/
 
 ## Description
 
-`store_builder` provides `Store`, `Value` and `StoreBuilder`.
+`store_builder` provides `Store`, `StoredSubject` and `StoreBuilder`.
 
-`Store` represents the state of the entire app. It can have multiple `Value`s.
+`Store` represents the state of the entire app.
+It can have multiple `StoredSubject`s internally.
 
-`Value` is a single value in the `Store` that identified by name.
+`StoredSubject` is a single stream in `Store` that identified by type and id.
 
-`StoreBuilder` is a `Widget` that bind with a `Value` and rebuilt when the
-`Value` is updated.
+`StoreBuilder` is a `Widget` that bound with a `StoredSubject`
+and rebuilt when the `StoredSubject` gets a new value.
 
 ## Usage
 
-Add `StoreProvider` and `Store` to your app. It makes your widgets allows to
-access the `Store`.
+Create a `Store` to holds state of the your app.
 
-### StoreProvider and Store
+### Store
 
 ```dart
-void main() => runApp(MaterialApp(
-      title: 'Your app',
-      home: StoreProvider(
-        store: Store(),
-        child: MyHomePage(),
-      ),
-    ));
+final Store store = Store();
 ```
 
 ### StoreBuilder
 
-Use `StoreBuilder<V>` to build widgets with a value. It is bind to individual
-values in the `Store` by name.
+Use `StoreBuilder<T>` to build widgets with a stream.
+It is bound to `StoredSubject<T>` in the `Store` that identified by type and id.
 
 ```dart
 child: StoreBuilder<int>(
-  name: "counter",
-  builder: (BuildContext context, Value<int> value) {
-    if (value.error != null) {
-        return ErrorWidget(value.error);
-    } else if (value.value == null) {
-        return LoadingWidget();
+  id: 'my_counter',
+  builder: (BuildContext context, StoredSubject<int> subject) {
+    if (subject.hasError) {
+      return YourErrorWidget(value.error);
+    } else if (!subject.hasValue) {
+      return YourLoadingWidget();
     }
-    return YourWidget(value.value);
+    return YourCounterWidget(subject.value);
   },
 ),
 ```
 
-### Value
+### StoredSubject
 
-You can gets a `Value` from `Store` by `Store#value` method, and gets the value
-by `Value#value` property.
+`StoredSubject` provides stream and sink for data that keeps updating.
 
-```dart
-// gets a Value.
-final Value<int> value = store.value<int>("counter");
+`StoredSubject`s of the same type and id in the `Store` have a same stream
+and sink. It allows to refer the same data from all over the app.
 
-// Value has value and error.
-final int counter = value.value ?? 0;
-// final Object error = value.error;
-```
+You can gets a `StoredSubject` from `Store` by `Store#use` method.
 
-When a `Value` is updates by `Value#value` and `Value#error`, all
-`StoreBuilder`s associated with that name are rebuilt.
+After using `StoredSubject`, you must to call `StoredSubject#release`
+to tell `Store` of the end of use.
 
-```dart
-// Update the value.
-value.value = counter + 1;
-```
+When a value is sent to `StoredSubject`,
+all listeners observing the same `StoredSubject` are called.
 
-## Architecture
-
-For separation of responsibility, we recommend that you implement store
-operations separate from Widgets.
-
-### Clean architecture
-
-Managing names and values as constants may prevent mistakes.
+`StoreBuilder`s are rebuilt because it observes `StoredSubject`
+of the specified type and id.
 
 ```dart
-class Names {
-  static const String counter = 'counter';
-  
-  ...
-  
-}
+// gets a subject.
+final StoredSubject<int> subject = store.use<int>('counter');
 
-class Values {
-  static Value<int> counter(Store store)
-      => store.value<int>(Names.counter);
-  
-  ...
-  
-}
+// gets a value
+final int counter = subject.value ?? 0;
+
+// updates the value.
+subject.value = counter + 1;
+// subject.add(counter + 1)
 ```
 
-Business logics are separated as UseCase in Clean Architecture.
-These do not depend on Widgets, but operates `Store` and `Value`s.
+## We are soliciting opinions
 
-```dart
-Future<void> incrementCounter(Store store) async {
-  final Value<int> value = Values.counter(store);
-  final int counter = value.value ?? 0;
-  value.value = counter + 1;
-}
-```
+Which is better, `StoredSubject` or `SharedSubject`?
 
-Widgets calls usecases.
+I am not good at English,
+so if you found any mistakes in the documentation or comments,
+please let me know.
 
-```dart
-class YourWidget extends StatelessWidget {
-  
-  ...
-  
-  Widget build(BuildContext context) {
-    
-    ...
-    
-    RaisedButton(
-      onPressed: () {
-        incrementCounter(Store.of(context));
-      },
-      
-      ...
-      
-    ),
-    
-    ...
-    
-  }
-}
-```
