@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:store_builder/store_builder.dart';
-
 import 'package:counter/main.dart';
 
 void main() {
@@ -11,10 +9,7 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(MaterialApp(
       title: '',
-      home: StoreProvider(
-        store: Store(),
-        child: MyHomePage(),
-      ),
+      home: MyHomePage(),
     ));
     await tester.pump();
     await tester.pump();

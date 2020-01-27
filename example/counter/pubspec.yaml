@@ -1,10 +1,7 @@
 name: counter
-description: Flux store builder example
+description: store builder example
 
-version: 1.0.0+1
-
-environment:
-  sdk: ">=2.1.0 <3.0.0"
+version: 0.3.0+1
 
 dependencies:
   flutter:
@@ -18,3 +15,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+environment:
+  sdk: '>=2.6.0 <3.0.0'
+  flutter: ^1.2.0

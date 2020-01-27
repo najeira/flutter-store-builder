@@ -4,30 +4,25 @@ import 'package:flutter/material.dart';
 
 import 'package:store_builder/store_builder.dart';
 
-const String _title = 'Flux store builder';
+const String title = 'Flux store builder';
 
-class Names {
-  static const String counter = 'identifier for the counter';
-}
+final Store store = Store();
 
-class Values {
-  static Value<int> counter(Store store) => store.value<int>(Names.counter);
-}
+const String counterID = 'identifier for the counter';
 
-void main() => runApp(MaterialApp(
-      title: _title,
-      home: StoreProvider(
-        store: Store(),
-        child: MyHomePage(),
+void main() => runApp(
+      MaterialApp(
+        title: title,
+        home: MyHomePage(),
       ),
-    ));
+    );
 
 class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(_title),
+        title: const Text(title),
       ),
       body: Center(
         child: Column(
@@ -37,10 +32,11 @@ class MyHomePage extends StatelessWidget {
               'You have pushed the button this many times:',
             ),
             StoreBuilder<int>(
-              name: Names.counter,
-              builder: (BuildContext context, Value<int> value) {
+              store: store,
+              id: counterID,
+              builder: (BuildContext context, StoredSubject<int> subject) {
                 return Text(
-                  '${value.value ?? 0}',
+                  '${subject.value ?? 0}',
                   style: Theme.of(context).textTheme.display1,
                 );
               },
@@ -50,7 +46,7 @@ class MyHomePage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          incrementCounter(Store.of(context));
+          incrementCounter(store);
         },
         tooltip: 'Increment',
         child: Icon(Icons.add),
@@ -60,7 +56,11 @@ class MyHomePage extends StatelessWidget {
 }
 
 Future<void> incrementCounter(Store store) async {
-  final Value<int> value = Values.counter(store);
-  final int count = value.value ?? 0;
-  value.value = count + 1;
+  final StoredSubject<int> subject = store.use<int>(counterID);
+  try {
+    final int counter = subject.value ?? 0;
+    subject.value = counter + 1;
+  } finally {
+    subject.release();
+  }
 }
