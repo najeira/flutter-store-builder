@@ -79,6 +79,28 @@ void main() {
     subject1.release();
   });
 
+  test("Released subject is no longer in the store", () {
+    final Store store = Store();
+    final StoredSubject<int> subject1 = store.use<int>("counter");
+
+    subject1.value = 123;
+    expect(subject1.value, 123);
+
+    subject1.release();
+
+    final StoredSubject<int> subject2 = store.use<int>("counter");
+
+    expect(identical(subject1, subject2), isFalse);
+
+    expect(subject2.value, isNull);
+    expect(subject2.hasValue, isFalse);
+    expect(subject2.error, isNull);
+    expect(subject2.hasError, isFalse);
+
+    subject2.release();
+  });
+
+
 //  test("Adding errors to subject", () {
 //    final Store store = Store();
 //    final StoredSubject<int> subject1 = store.use<int>("counter");
