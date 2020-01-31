@@ -38,6 +38,22 @@ void main() {
     subject2.release();
   });
 
+  test("Different id returns different subjects", () {
+    final Store store = Store();
+    final StoredSubject<int> subject1 = store.use<int>("foo");
+    final StoredSubject<int> subject2 = store.use<int>("bar");
+
+    expect(identical(subject1, subject2), isFalse);
+
+    const int value1 = 123;
+    subject1.value = value1;
+    expect(subject1.value, value1);
+    expect(subject2.value, isNull);
+
+    subject1.release();
+    subject2.release();
+  });
+
   test("Adding values to subject", () {
     final Store store = Store();
     final StoredSubject<int> subject1 = store.use<int>("counter");
