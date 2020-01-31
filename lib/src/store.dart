@@ -50,8 +50,8 @@ class StoredSubject<T> {
     T seedValue,
     void onRelease(),
   })  : _subject = seedValue != null
-            ? BehaviorSubject<T>()
-            : BehaviorSubject<T>.seeded(seedValue),
+            ? BehaviorSubject<T>.seeded(seedValue)
+            : BehaviorSubject<T>(),
         _onRelease = onRelease {
     _subscription = _subject.listen(
       _onData,
