@@ -2,14 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'provider.dart';
 import 'store.dart';
 
+// TODO: subject should be ValueStream<T>
 typedef StoredSubjectWidgetBuilder<T> = Widget Function(BuildContext context, StoredSubject<T> subject);
 
 class StoreBuilder<T> extends StatefulWidget {
   const StoreBuilder({
     Key key,
-    @required this.store,
+    this.store,
     @required this.id,
     @required this.builder,
   })  : assert(id != null),
@@ -34,9 +36,13 @@ class _StoreBuilderState<T> extends State<StoreBuilder<T>> {
 
   StreamSubscription<T> _subscription;
 
+  Store get _store {
+    return widget.store ?? StoreProvider.of(context);
+  }
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _subscribe();
   }
 
@@ -62,10 +68,11 @@ class _StoreBuilderState<T> extends State<StoreBuilder<T>> {
   }
 
   void _subscribe() {
-    assert(_subject == null);
-    assert(_subscription == null);
-    _subject = widget.store.use<T>(widget.id);
-    _subscription = _subject.listen(_onData);
+    if (_subject == null) {
+      assert(_subscription == null);
+      _subject = _store.use<T>(widget.id);
+      _subscription = _subject.listen(_onData);
+    }
   }
 
   void _unsubscribe() {
