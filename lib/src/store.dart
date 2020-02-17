@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 
 /// A Store that holds the app state.
@@ -49,14 +49,18 @@ class StoredSubject<T> {
     this.id,
     T seedValue,
     void onRelease(),
-  })  : _subject = seedValue != null
-            ? BehaviorSubject<T>.seeded(seedValue)
-            : BehaviorSubject<T>(),
+  })  : _subject = _initSubject<T>(seedValue),
         _onRelease = onRelease {
     _subscription = _subject.listen(
       _onData,
       onError: _onError,
     );
+  }
+
+  static BehaviorSubject<T> _initSubject<T>(T seedValue) {
+    return seedValue != null
+        ? BehaviorSubject<T>.seeded(seedValue)
+        : BehaviorSubject<T>();
   }
 
   final Type type;
