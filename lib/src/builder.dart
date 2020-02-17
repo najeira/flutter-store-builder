@@ -8,8 +8,9 @@ import 'store.dart';
 // TODO: subject should be ValueStream<T>
 typedef StoredSubjectWidgetBuilder<T> = Widget Function(BuildContext context, StoredSubject<T> subject);
 
-class StoreBuilder<T> extends StatefulWidget {
-  const StoreBuilder({
+/// [SubjectBuilder] builds a widget with the subject in the [Store].
+class SubjectBuilder<T> extends StatefulWidget {
+  const SubjectBuilder({
     Key key,
     this.store,
     @required this.id,
@@ -18,20 +19,25 @@ class StoreBuilder<T> extends StatefulWidget {
         assert(builder != null),
         super(key: key);
 
+  /// Related to this widget.
+  /// If omitted, [SubjectBuilder] will automatically find it
+  /// using [StoreProvider] and the current [BuildContext].
   final Store store;
 
+  /// 
   final Object id;
 
+  /// Build a widget tree based on the subject.
   final StoredSubjectWidgetBuilder<T> builder;
 
   @override
   State<StatefulWidget> createState() {
-    return _StoreBuilderState<T>();
+    return _SubjectBuilderState<T>();
   }
 }
 
-/// State for [StoreBuilder].
-class _StoreBuilderState<T> extends State<StoreBuilder<T>> {
+/// State for [SubjectBuilder].
+class _SubjectBuilderState<T> extends State<SubjectBuilder<T>> {
   StoredSubject<T> _subject;
 
   StreamSubscription<T> _subscription;
@@ -47,7 +53,7 @@ class _StoreBuilderState<T> extends State<StoreBuilder<T>> {
   }
 
   @override
-  void didUpdateWidget(StoreBuilder<T> oldWidget) {
+  void didUpdateWidget(SubjectBuilder<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.id != widget.id) {
       _unsubscribe();
