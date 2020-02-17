@@ -118,34 +118,6 @@ void main() {
     subject2.release();
   });
 
-  testWidgets("StoreBuilder is built with subject", (tester) async {
-    final Store store = Store();
-    final StoredSubject<int> subject1 = store.use<int>("counter", seedValue: 0);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: StoreBuilder<int>(
-          store: store,
-          id: "counter",
-          builder: (BuildContext context, StoredSubject<int> subject) {
-            return Text('${subject.value}');
-          },
-        ),
-      ),
-    );
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    subject1.value = 1;
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-  });
-
-
 //  test("Adding errors to subject", () {
 //    final Store store = Store();
 //    final StoredSubject<int> subject1 = store.use<int>("counter");
