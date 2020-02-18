@@ -1,23 +1,27 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/single_child_widget.dart';
 
 import 'provider.dart';
 import 'store.dart';
 
 // TODO: subject should be ValueStream<T>
-typedef StoredSubjectWidgetBuilder<T> = Widget Function(BuildContext context, StoredSubject<T> subject);
-
-/// [SubjectBuilder] builds a widget with the subject in the [Store].
-class SubjectBuilder<T> extends StatefulWidget {
+typedef StoredSubjectWidgetBuilder<T> = Widget Function(
+  BuildContext context,
+  StoredSubject<T> subject,
+  Widget child,
+);
+class SubjectBuilder<T> extends SingleChildStatefulWidget {
   const SubjectBuilder({
     Key key,
     this.store,
     @required this.id,
     @required this.builder,
+    Widget child,
   })  : assert(id != null),
         assert(builder != null),
-        super(key: key);
+        super(key: key, child: child);
 
   /// Related to this widget.
   /// If omitted, [SubjectBuilder] will automatically find it
@@ -37,7 +41,7 @@ class SubjectBuilder<T> extends StatefulWidget {
 }
 
 /// State for [SubjectBuilder].
-class _SubjectBuilderState<T> extends State<SubjectBuilder<T>> {
+class _SubjectBuilderState<T> extends SingleChildState<SubjectBuilder<T>> {
   StoredSubject<T> _subject;
 
   StreamSubscription<T> _subscription;
@@ -59,12 +63,6 @@ class _SubjectBuilderState<T> extends State<SubjectBuilder<T>> {
       _unsubscribe();
       _subscribe();
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    assert(_subject != null);
-    return widget.builder(context, _subject);
   }
 
   @override
@@ -94,5 +92,11 @@ class _SubjectBuilderState<T> extends State<SubjectBuilder<T>> {
 
   void _onData(T event) {
     setState(() {});
+  }
+
+  @override
+  Widget buildWithChild(BuildContext context, Widget child) {
+    assert(_subject != null);
+    return widget.builder(context, _subject, child);
   }
 }

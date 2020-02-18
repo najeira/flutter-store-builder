@@ -14,7 +14,7 @@ void main() {
         home: SubjectBuilder<int>(
           store: store,
           id: "counter",
-          builder: (BuildContext context, StoredSubject<int> subject) {
+          builder: (BuildContext context, StoredSubject<int> subject, Widget child) {
             return Text('${subject.value}');
           },
         ),
