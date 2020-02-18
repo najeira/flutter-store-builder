@@ -47,14 +47,14 @@ StoreProvider(
 
 Use `SubjectBuilder<T>` to build widgets with a subject.
 
-It is bound to `StoredSubject<T>` in the `Store` that identified by type and id.
+It is bound to `StoredSubject<T>` in the `Store` that identified by type and ID.
 
 ```dart
-child: SubjectBuilder<int>(
+SubjectBuilder<int>(
   id: 'my counter',
   builder: (BuildContext context, StoredSubject<int> subject, Widget child) {
     if (subject.hasError) {
-      return YourErrorWidget(value.error);
+      return YourErrorWidget(subject.error);
     } else if (!subject.hasValue) {
       return YourLoadingWidget();
     }
@@ -65,12 +65,12 @@ child: SubjectBuilder<int>(
 
 ### SubjectProvider
 
-Use `SubjectProvider<T>` to provide the subject and its value to descendants.
+Use `SubjectProvider<T>` to provide a subject and its value to descendants.
 
-It is bound to `StoredSubject<T>` in the `Store` that identified by type and id.
+The subject is in the `Store` identified by type and ID.
 
 The difference from `SubjectBuilder` is that `SubjectProvider` and
-consumers can be described separately in the widget tree.
+consumers can be described separately in the widgets tree.
 
 ```dart
 SubjectProvider<int>(
@@ -92,13 +92,13 @@ SubjectProvider<int>(
 
 `StoredSubject` provides stream and sink for data that keeps updating.
 
-`StoredSubject`s of the same type and id in the `Store` have the same stream
+`StoredSubject`s of the same type and ID in the `Store` have the same stream
 and sink. It allows to refer the same data from all over the app.
 
 You can get a `StoredSubject` from `Store` by `Store#use` method.
 
 After using `StoredSubject`, you must call `StoredSubject#release`
-to tell `Store` of the end of use.
+to tell the `Store` of the end of use.
 
 `SubjectBuilder` and `SubjectProvider` call `StoredSubject#release` properly
 internally, depending on the lifetime of the widget.
@@ -123,15 +123,15 @@ subject.release();
 
 ## Data lifetime
 
-Data is kept in `Store` as long as there are `StoredSubject`s used.
+Data is kept in the `Store` as long as there are `StoredSubject`s used.
 
 When all `StoredSubject`s with the same type and id are released,
 they are removed from `Store`.
 
 In other words, data management by reference counting.
 
-`SubjectBuilder` and `SubjectProvider` uses `StoredSubject` internally,
-so `StoredSubject` will be kept as long as there is a related their widgets.
+`SubjectBuilder` and `SubjectProvider` use `StoredSubject` internally,
+so `StoredSubject` will be kept as long as there is a related widget.
 
 If you want to keep the data even if widgets are gone,
 get `StoredSubject` and do not release it.
