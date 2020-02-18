@@ -4,7 +4,7 @@ v0.4 is not compatible with v0.3 and earlier.
 
 # store_builder
 
-A Flux store that aggregates the state of apps
+A Flux store that aggregates the state of the app
 and various widgets that use it.
 
 ## Install
@@ -13,7 +13,7 @@ See [pub.dartlang.org/packages/store_builder](https://pub.dartlang.org/packages/
 
 ## Description
 
-`store_builder` provides `Store` and `StoredSubject` for states,
+`store_builder` provides `Store` and `StoredSubject` for state,
 And `StoreProvider`, `SubjectBuilder` and `SubjectProvider` for widgets.
 
 `Store` represents the state of the entire app.
@@ -29,12 +29,18 @@ and its value to descendants.
 
 ## Usage
 
-### Store
+### Store and StoreProvider
 
 Create a `Store` to holds the state of the app.
 
+Generally, provide the [Store] for wigets tree at the root of the app.
+You can use `StoreProvider` fot that.
+
 ```dart
-final Store store = Store();
+StoreProvider<int>(
+  store: Store(),
+  child: MaterialApp(...),
+);
 ```
 
 ### SubjectBuilder
