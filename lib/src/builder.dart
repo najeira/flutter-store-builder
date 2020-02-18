@@ -12,6 +12,28 @@ typedef StoredSubjectWidgetBuilder<T> = Widget Function(
   StoredSubject<T> subject,
   Widget child,
 );
+
+/// Builds a widget with the subject.
+/// 
+/// The [SubjectBuilder] gets a subject via [Provider<T>.of] from its ancestors
+/// and passes its value to [builder].
+/// 
+/// [SubjectBuilder] releases the subject when this widget is disposed.
+/// 
+/// ```dart
+/// SubjectBuilder<int>(
+///   id: 'my counter',
+///   builder: (BuildContext context, StoredSubject<int> subject, Widget child) {
+///     if (subject.hasError) {
+///       return ErrorWidget(subject.error);
+///     } else if (subject.hasValue) {
+///       return Text('${subject.value}');
+///     }
+///     return Text('Now loading...');
+///   },
+/// );
+/// ```
+/// 
 class SubjectBuilder<T> extends SingleChildStatefulWidget {
   const SubjectBuilder({
     Key key,
@@ -24,14 +46,15 @@ class SubjectBuilder<T> extends SingleChildStatefulWidget {
         super(key: key, child: child);
 
   /// Related to this widget.
-  /// If omitted, [SubjectBuilder] will automatically find it
-  /// using [StoreProvider] and the current [BuildContext].
+  /// 
+  /// If omitted, [SubjectBuilder] will automatically find it using
+  /// [StoreProvider] and the current [BuildContext].
   final Store store;
 
-  /// 
+  /// Identify the subject in the [Store].
   final Object id;
 
-  /// Build a widget tree based on the subject.
+  /// Builds a widget tree based on the subject.
   final StoredSubjectWidgetBuilder<T> builder;
 
   @override
