@@ -12,7 +12,7 @@ import 'store.dart';
 /// [StoreProvider].
 ///
 /// ```dart
-/// StoreProvider<int>(
+/// StoreProvider(
 ///   store: Store(),
 ///   child: MaterialApp(...),
 /// );

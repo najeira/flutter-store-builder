@@ -37,7 +37,7 @@ Generally, provide the `Store` for wigets tree at the root of the app.
 You can use `StoreProvider` for that.
 
 ```dart
-StoreProvider<int>(
+StoreProvider(
   store: Store(),
   child: MaterialApp(...),
 );
