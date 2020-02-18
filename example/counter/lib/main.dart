@@ -4,16 +4,17 @@ import 'package:flutter/material.dart';
 
 import 'package:store_builder/store_builder.dart';
 
-const String title = 'Flux store builder';
-
-final Store store = Store();
+const String title = 'store-builder counter example';
 
 const String counterID = 'identifier for the counter';
 
 void main() => runApp(
-      MaterialApp(
-        title: title,
-        home: MyHomePage(),
+      StoreProvider(
+        store: Store(),
+        child: MaterialApp(
+          title: title,
+          home: MyHomePage(),
+        ),
       ),
     );
 
@@ -25,27 +26,31 @@ class MyHomePage extends StatelessWidget {
         title: const Text(title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            StoreBuilder<int>(
-              store: store,
-              id: counterID,
-              builder: (BuildContext context, StoredSubject<int> subject) {
-                return Text(
+        child: SubjectBuilder<int>(
+          id: counterID,
+          builder: (BuildContext context, StoredSubject<int> subject, Widget child) {
+            if (!subject.hasValue) {
+              return const Text('The button has not been pressed yet');
+            }
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                child,
+                Text(
                   '${subject.value ?? 0}',
-                  style: Theme.of(context).textTheme.display1,
-                );
-              },
-            ),
-          ],
+                  style: Theme.of(context).textTheme.headline4,
+                ),
+              ],
+            );
+          },
+          child: const Text(
+            'You have pushed the button this many times:',
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          final Store store = StoreProvider.of(context);
           incrementCounter(store);
         },
         tooltip: 'Increment',

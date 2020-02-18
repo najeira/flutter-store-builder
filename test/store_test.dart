@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:store_builder/store_builder.dart';
@@ -115,7 +117,6 @@ void main() {
 
     subject2.release();
   });
-
 
 //  test("Adding errors to subject", () {
 //    final Store store = Store();

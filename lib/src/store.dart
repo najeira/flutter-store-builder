@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 
 /// A Store that holds the app state.
@@ -42,21 +42,23 @@ class Store {
   }
 }
 
-/// 
-class StoredSubject<T> {
+///
+class StoredSubject<T> extends ChangeNotifier implements ValueListenable<T> {
   StoredSubject._({
     this.type,
     this.id,
     T seedValue,
     void onRelease(),
-  })  : _subject = seedValue != null
-            ? BehaviorSubject<T>.seeded(seedValue)
-            : BehaviorSubject<T>(),
+  })  : _subject = _initSubject<T>(seedValue),
         _onRelease = onRelease {
     _subscription = _subject.listen(
       _onData,
       onError: _onError,
     );
+  }
+
+  static BehaviorSubject<T> _initSubject<T>(T seedValue) {
+    return seedValue != null ? BehaviorSubject<T>.seeded(seedValue) : BehaviorSubject<T>();
   }
 
   final Type type;
@@ -119,11 +121,13 @@ class StoredSubject<T> {
   void _onData(T event) {
     _error = null;
     _hasError = false;
+    notifyListeners();
   }
 
   void _onError(Object error) {
     _error = error;
     _hasError = true;
+    notifyListeners();
   }
 
   int _referenceCount = 1;
