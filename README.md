@@ -1,10 +1,11 @@
 Still in development and not stable.
 
-v0.3 is not compatible with v0.2 and earlier.
+v0.4 is not compatible with v0.3 and earlier.
 
 # store_builder
 
-Flux store and builder for Flutter.
+A Flux store that aggregates the state of apps
+and various widgets that uses it.
 
 ## Install
 
@@ -12,15 +13,19 @@ See [pub.dartlang.org/packages/store_builder](https://pub.dartlang.org/packages/
 
 ## Description
 
-`store_builder` provides `Store`, `StoredSubject` and `StoreBuilder`.
+`store_builder` provides `Store` and `StoredSubject` for states,
+And `StoreProvider`, `SubjectBuilder` and `SubjectProvider` for widgets.
 
 `Store` represents the state of the entire app.
 It can have multiple `StoredSubject`s internally.
 
 `StoredSubject` is a single stream in `Store` that identified by type and id.
 
-`StoreBuilder` is a `Widget` that bound with a `StoredSubject`
+`SubjectBuilder` is a widget that bound with a `StoredSubject`
 and rebuilt when the `StoredSubject` gets a new value.
+
+`SubjectProvider` is a widget that provides a `StoredSubject`
+and its value to descendants.
 
 ## Usage
 
@@ -32,15 +37,16 @@ Create a `Store` to holds state of the your app.
 final Store store = Store();
 ```
 
-### StoreBuilder
+### SubjectBuilder
 
-Use `StoreBuilder<T>` to build widgets with a stream.
+Use `SubjectBuilder<T>` to build widgets with a subject.
+
 It is bound to `StoredSubject<T>` in the `Store` that identified by type and id.
 
 ```dart
-child: StoreBuilder<int>(
-  id: 'my_counter',
-  builder: (BuildContext context, StoredSubject<int> subject) {
+child: SubjectBuilder<int>(
+  id: 'my counter',
+  builder: (BuildContext context, StoredSubject<int> subject, Widget child) {
     if (subject.hasError) {
       return YourErrorWidget(value.error);
     } else if (!subject.hasValue) {
@@ -49,6 +55,31 @@ child: StoreBuilder<int>(
     return YourCounterWidget(subject.value);
   },
 ),
+```
+
+### SubjectProvider
+
+Use `SubjectProvider<T>` to provide subject and its value to descendants.
+
+It is bound to `StoredSubject<T>` in the `Store` that identified by type and id.
+
+The difference from `SubjectBuilder` is that `SubjectProvider` and
+consumers can be described separately in the widget tree.
+
+```dart
+SubjectProvider<int>(
+  id: 'my counter',
+  child: Consumer<StoredSubject<int>>(
+    builder: (BuildContext context, StoredSubject<int> subject, Widget child) {
+      if (subject.hasError) {
+        return ErrorWidget(subject.error);
+      } else if (!subject.hasValue) {
+        return YourLoadingWidget();
+      }
+      return YourCounterWidget(subject.value);
+    },
+  ),
+);
 ```
 
 ### StoredSubject
@@ -63,9 +94,13 @@ You can gets a `StoredSubject` from `Store` by `Store#use` method.
 After using `StoredSubject`, you must to call `StoredSubject#release`
 to tell `Store` of the end of use.
 
+`SubjectBuilder` and `SubjectProvider` call `StoredSubject#release` properly
+internally, depending on the lifetime of the widget.
+
 When a new value is sent to `StoredSubject`,
 all listeners observing the `StoredSubject` are called.
-That is, the related `StoreBuilder`s are also rebuilt.
+
+That is, the related `SubjectBuilder`s are also rebuilt.
 
 ```dart
 // gets a subject.
@@ -76,7 +111,6 @@ final int counter = subject.value ?? 0;
 
 // updates the value.
 subject.value = counter + 1;
-// subject.add(counter + 1);
 
 subject.release();
 ```
@@ -90,17 +124,16 @@ they are removed from `Store`.
 
 In other words, data management by reference counting.
 
-`StoreBuilder` uses `StoredSubject` internally,
-so `StoredSubject` will be kept as long as there is a related `StoreBuilder`.
+`SubjectBuilder` and `SubjectProvider` uses `StoredSubject` internally,
+so `StoredSubject` will be kept as long as there is a related their widgets.
 
-If you want to keep the data even if `StoreBuilder`s are gone,
+If you want to keep the data even if widgets are gone,
 gets `StoredSubject` and do not release it.
 
 ## We are soliciting opinions
 
-Which is better, `StoredSubject` or `SharedSubject`?
+Do you have a suggestion for a more appropriate class name?
 
 I am not good at English,
 so if you found any mistakes in the documentation or comments,
 please let me know.
-
