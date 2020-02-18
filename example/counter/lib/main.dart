@@ -31,7 +31,7 @@ class MyHomePage extends StatelessWidget {
             Text(
               'You have pushed the button this many times:',
             ),
-            StoreBuilder<int>(
+            SubjectBuilder<int>(
               store: store,
               id: counterID,
               builder: (BuildContext context, StoredSubject<int> subject) {
