@@ -33,8 +33,8 @@ and its value to descendants.
 
 Create a `Store` to holds the state of the app.
 
-Generally, provide the [Store] for wigets tree at the root of the app.
-You can use `StoreProvider` fot that.
+Generally, provide the `Store` for wigets tree at the root of the app.
+You can use `StoreProvider` for that.
 
 ```dart
 StoreProvider<int>(
