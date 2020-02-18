@@ -43,7 +43,7 @@ class Store {
 }
 
 /// 
-class StoredSubject<T> {
+class StoredSubject<T> extends ChangeNotifier implements ValueListenable<T> {
   StoredSubject._({
     this.type,
     this.id,
@@ -123,11 +123,13 @@ class StoredSubject<T> {
   void _onData(T event) {
     _error = null;
     _hasError = false;
+    notifyListeners();
   }
 
   void _onError(Object error) {
     _error = error;
     _hasError = true;
+    notifyListeners();
   }
 
   int _referenceCount = 1;
