@@ -42,7 +42,7 @@ class Store {
   }
 }
 
-/// 
+///
 class StoredSubject<T> extends ChangeNotifier implements ValueListenable<T> {
   StoredSubject._({
     this.type,
@@ -58,9 +58,7 @@ class StoredSubject<T> extends ChangeNotifier implements ValueListenable<T> {
   }
 
   static BehaviorSubject<T> _initSubject<T>(T seedValue) {
-    return seedValue != null
-        ? BehaviorSubject<T>.seeded(seedValue)
-        : BehaviorSubject<T>();
+    return seedValue != null ? BehaviorSubject<T>.seeded(seedValue) : BehaviorSubject<T>();
   }
 
   final Type type;

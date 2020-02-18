@@ -14,12 +14,12 @@ typedef StoredSubjectWidgetBuilder<T> = Widget Function(
 );
 
 /// Builds a widget with the subject.
-/// 
+///
 /// The [SubjectBuilder] gets a subject via [Provider<T>.of] from its ancestors
 /// and passes its value to [builder].
-/// 
+///
 /// [SubjectBuilder] releases the subject when this widget is disposed.
-/// 
+///
 /// ```dart
 /// SubjectBuilder<int>(
 ///   id: 'my counter',
@@ -33,7 +33,7 @@ typedef StoredSubjectWidgetBuilder<T> = Widget Function(
 ///   },
 /// );
 /// ```
-/// 
+///
 class SubjectBuilder<T> extends SingleChildStatefulWidget {
   const SubjectBuilder({
     Key key,
@@ -46,7 +46,7 @@ class SubjectBuilder<T> extends SingleChildStatefulWidget {
         super(key: key, child: child);
 
   /// Related to this widget.
-  /// 
+  ///
   /// If omitted, [SubjectBuilder] will automatically find it using
   /// [StoreProvider] and the current [BuildContext].
   final Store store;

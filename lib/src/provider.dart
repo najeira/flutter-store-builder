@@ -15,10 +15,9 @@ class StoreProvider extends SingleChildStatelessWidget {
     Key key,
     @required this.store,
     @required Widget child,
-  })
-    : assert(store != null),
-      assert(child != null),
-      super(key: key, child: child);
+  })  : assert(store != null),
+        assert(child != null),
+        super(key: key, child: child);
 
   final Store store;
 
@@ -47,10 +46,9 @@ class SubjectProvider<T> extends SingleChildStatelessWidget {
     this.store,
     @required this.id,
     @required Widget child,
-  })
-    : assert(store != null),
-      assert(child != null),
-      super(key: key, child: child);
+  })  : assert(store != null),
+        assert(child != null),
+        super(key: key, child: child);
 
   /// Related to this widget.
   ///
