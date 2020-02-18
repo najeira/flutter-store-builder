@@ -10,6 +10,14 @@ import 'store.dart';
 ///
 /// Connect to the [Store] provided by this widget using a [StoreBuilder] and
 /// [StoreProvider].
+///
+/// ```dart
+/// StoreProvider<int>(
+///   store: Store(),
+///   child: MaterialApp(...),
+/// );
+/// ```
+///
 class StoreProvider extends SingleChildStatelessWidget {
   const StoreProvider({
     Key key,
@@ -40,6 +48,39 @@ class StoreProvider extends SingleChildStatelessWidget {
 /// ancestors and provides it and its value to descendants.
 ///
 /// [SubjectProvider] releases the subject when this widget is disposed.
+///
+/// The difference from [SubjectBuilder] is that [SubjectProvider] and
+/// consumers can be described separately in the widget tree.
+/// 
+/// ```dart
+/// SubjectProvider<int>(
+///   id: 'my counter',
+///   child: Consumer<StoredSubject<int>>(
+///     builder: (BuildContext context, StoredSubject<int> subject, Widget child) {
+///       if (subject.hasError) {
+///         return ErrorWidget(subject.error);
+///       } else if (subject.hasValue) {
+///         return Text('${subject.value}');
+///       }
+///       return Text('Now loading...');
+///     },
+///   ),
+/// );
+/// ```
+///
+/// You can also consume only the value of the subject.
+///
+/// ```dart
+/// SubjectProvider<int>(
+///   id: 'my counter',
+///   child: Consumer<int>(
+///     builder: (BuildContext context, int value, Widget child) {
+///       return Text('${value}');
+///     },
+///   ),
+/// );
+/// ```
+///
 class SubjectProvider<T> extends SingleChildStatelessWidget {
   const SubjectProvider({
     Key key,
