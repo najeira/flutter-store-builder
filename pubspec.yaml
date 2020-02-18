@@ -7,7 +7,7 @@ homepage: https://github.com/najeira/flutter-store-builder
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^4.0.2
+  provider: ^4.0.4
   rxdart: ^0.23.1
 
 dev_dependencies:
