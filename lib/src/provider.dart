@@ -54,6 +54,7 @@ class SubjectProvider<T> extends SingleChildStatelessWidget {
 
   @override
   Widget buildWithChild(BuildContext context, Widget child) {
+    // observe changes of the subject itself and handle its lifetime
     return InheritedProvider<StoredSubject<T>>(
       create: (BuildContext context) {
         return _create(context);
@@ -62,7 +63,7 @@ class SubjectProvider<T> extends SingleChildStatelessWidget {
         if (id == previous.id) {
           return previous;
         }
-        previous.release();
+        // previous.release(); // dispose will be call for previous?
         return _create(context);
       },
       dispose: (BuildContext context, StoredSubject<T> subject) {
@@ -70,15 +71,11 @@ class SubjectProvider<T> extends SingleChildStatelessWidget {
       },
       child: Consumer<StoredSubject<T>>(
         builder: (BuildContext context, StoredSubject<T> subject, Widget child) {
-          return StreamBuilder<T>(
-            initialData: subject.value,
-            stream: subject.stream,
-            builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
-              return Provider<T>.value(
-                value: snapshot.data,
-                child: child,
-              );
-            },
+          // observe changes of values and errors of the subject
+          // provide values of the subject
+          return ValueListenableProvider<T>.value(
+            value: subject,
+            child: child,
           );
         },
         child: child,
