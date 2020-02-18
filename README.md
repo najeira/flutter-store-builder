@@ -5,7 +5,7 @@ v0.4 is not compatible with v0.3 and earlier.
 # store_builder
 
 A Flux store that aggregates the state of apps
-and various widgets that uses it.
+and various widgets that use it.
 
 ## Install
 
@@ -31,7 +31,7 @@ and its value to descendants.
 
 ### Store
 
-Create a `Store` to holds state of the your app.
+Create a `Store` to holds the state of the app.
 
 ```dart
 final Store store = Store();
@@ -59,7 +59,7 @@ child: SubjectBuilder<int>(
 
 ### SubjectProvider
 
-Use `SubjectProvider<T>` to provide subject and its value to descendants.
+Use `SubjectProvider<T>` to provide the subject and its value to descendants.
 
 It is bound to `StoredSubject<T>` in the `Store` that identified by type and id.
 
@@ -86,12 +86,12 @@ SubjectProvider<int>(
 
 `StoredSubject` provides stream and sink for data that keeps updating.
 
-`StoredSubject`s of the same type and id in the `Store` have a same stream
+`StoredSubject`s of the same type and id in the `Store` have the same stream
 and sink. It allows to refer the same data from all over the app.
 
-You can gets a `StoredSubject` from `Store` by `Store#use` method.
+You can get a `StoredSubject` from `Store` by `Store#use` method.
 
-After using `StoredSubject`, you must to call `StoredSubject#release`
+After using `StoredSubject`, you must call `StoredSubject#release`
 to tell `Store` of the end of use.
 
 `SubjectBuilder` and `SubjectProvider` call `StoredSubject#release` properly
@@ -128,7 +128,7 @@ In other words, data management by reference counting.
 so `StoredSubject` will be kept as long as there is a related their widgets.
 
 If you want to keep the data even if widgets are gone,
-gets `StoredSubject` and do not release it.
+get `StoredSubject` and do not release it.
 
 ## We are soliciting opinions
 
